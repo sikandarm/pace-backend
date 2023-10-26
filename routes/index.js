@@ -4,6 +4,7 @@ const roleRouter = require("./roleRoutes");
 const permissionRouter = require("./permissionRoutes");
 const inventoryRouter = require("./inventoryRoutes");
 const jobRouter = require("./jobRoutes");
+const contactRouter = require("./contactRoutes");
 const taskRouter = require("./taskRoutes");
 const rejectedReasonRouter = require("./rejectedReasonRoutes");
 const caReportRouter = require("./caReportRoutes");
@@ -16,6 +17,7 @@ exports.apiRoutes = (app) => {
   app.use("/api/permission", permissionRouter);
   app.use("/api/inventory", inventoryRouter);
   app.use("/api/job", jobRouter);
+  app.use("/api/contact", contactRouter);
   app.use("/api/task", taskRouter);
   app.use("/api/rejected-reasons", rejectedReasonRouter);
   app.use("/api/CA-report", caReportRouter);
