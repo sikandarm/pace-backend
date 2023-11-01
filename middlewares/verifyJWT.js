@@ -16,6 +16,7 @@ const verifyJWT = async (req, res, next) => {
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) return errorResponse(res, 403, 'Forbidden', err);
     req.user = decoded;
+    console.log(req,"=======")
     next();
   });
 };

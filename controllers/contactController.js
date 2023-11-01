@@ -33,8 +33,6 @@ exports.createContact = async (req, res) => {
   }
 };
 
-const { validationResult } = require("express-validator");
-
 exports.updateContact = async (req, res) => {
   const transaction = await sequelize.transaction();
 
