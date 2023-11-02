@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+const { Op } = require("sequelize");
 
 // Create a new PurchaseOrder
 
@@ -19,7 +20,7 @@ const createPurchaseOrder = async (req, res) => {
       ship_via,
       order_by,
       ship_to,
-      address, 
+      address,
       phone,
       email,
       term,
@@ -125,13 +126,62 @@ const updatePurchaseOrder = async (req, res) => {
 
 const getAllPurchaseOrders = async (req, res) => {
   try {
-    const purchaseOrders = await PurchaseOrder.findAll();
+    const name = req.query.vendor_name;
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    let whereClause = {};
 
+    // Define a condition for the search
+    // const searchCondition = {
+    //   deleted_at: null,
+    // };
+    if (name) {
+      whereClause = { vendor_name: name };
+    }else{
+      whereClause = {deleted_at : null}
+    }
+
+    const totalCount = await PurchaseOrder.count({
+      where: whereClause,
+    });
+    const totalPages = Math.ceil(totalCount / pageSize);
+    const offset = (page - 1) * pageSize;
+    const purchaseOrders = await PurchaseOrder.findAll({
+      where: whereClause,
+      offset:offset,
+    });
+    
+
+    if (!purchaseOrders || purchaseOrders.length === 0) {
+      return successResponse(res, 200, { purchaseOrders: [], totalPages });
+    }
+    const modifiedPurchaseOrder = purchaseOrders.map((purchaseOrder) => {
+      return {
+        id: purchaseOrder.id,
+        vendor_name: purchaseOrder.vendor_name,
+        company_name: purchaseOrder.company_name,
+        delivery_date: purchaseOrder.delivery_date,
+        confirm_with: purchaseOrder.confirm_with,
+        order_date: purchaseOrder.order_date,
+        placed_via: purchaseOrder.placed_via,
+        po_number: purchaseOrder.po_number,
+        order_by: purchaseOrder.order_by,
+        order_by: purchaseOrder.order_by,
+        ship_via: purchaseOrder.ship_via,
+        phone: purchaseOrder.phone,
+        email: purchaseOrder.email,
+        term: purchaseOrder.term,
+        fax: purchaseOrder.fax,
+      };
+    });
     return successResponse(
       res,
       200,
-      { purchaseOrders },
-      "All purchase orders retrieved successfully"
+      {
+        purchaseOrders: modifiedPurchaseOrder,
+        page: (totalPages, req.query.page),
+      },
+      "Purchase orders retrieved successfully"
     );
   } catch (error) {
     return errorResponse(res, 500, "Something went wrong", error);
@@ -192,7 +242,6 @@ const deletePurchaseOrder = async (req, res) => {
     return errorResponse(res, 500, "Error while deleting PurchaseOrder", err);
   }
 };
-
 
 module.exports = {
   createPurchaseOrder,
