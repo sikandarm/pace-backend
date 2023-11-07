@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Inventory extends Model {
     /**
@@ -10,7 +8,9 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      Inventory.hasMany(models.Purchase_Order_Items, {
+        foreignKey: "id",
+      });
     }
   }
   Inventory.init(
@@ -43,7 +43,23 @@ module.exports = (sequelize, DataTypes) => {
         ),
         allowNull: false,
         validate: {
-          isIn: [["2L", "C", "HP", "HSS", "L", "M", "MC", "MT", "PIPE", "S", "ST", "W", "WT"]],
+          isIn: [
+            [
+              "2L",
+              "C",
+              "HP",
+              "HSS",
+              "L",
+              "M",
+              "MC",
+              "MT",
+              "PIPE",
+              "S",
+              "ST",
+              "W",
+              "WT",
+            ],
+          ],
         },
       },
       weight: {

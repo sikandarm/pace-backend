@@ -1,7 +1,3 @@
-const path = require("path");
-const fs = require("fs");
-const { Op } = require("sequelize");
-
 // Create a new PurchaseOrder
 
 const { errorResponse, successResponse } = require("../utils/apiResponse");
@@ -137,8 +133,8 @@ const getAllPurchaseOrders = async (req, res) => {
     // };
     if (name) {
       whereClause = { vendor_name: name };
-    }else{
-      whereClause = {deleted_at : null}
+    } else {
+      whereClause = { deleted_at: null };
     }
 
     const totalCount = await PurchaseOrder.count({
@@ -148,9 +144,8 @@ const getAllPurchaseOrders = async (req, res) => {
     const offset = (page - 1) * pageSize;
     const purchaseOrders = await PurchaseOrder.findAll({
       where: whereClause,
-      offset:offset,
+      offset: offset,
     });
-    
 
     if (!purchaseOrders || purchaseOrders.length === 0) {
       return successResponse(res, 200, { purchaseOrders: [], totalPages });

@@ -7,10 +7,13 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate({}) {
-      // define association here
+    static associate(models) {
+      PurchaseOrder.belongsTo(models.Purchase_Order_Items, {
+        foreignKey: "id",
+      });
     }
   }
+
   PurchaseOrder.init(
     {
       po_id: DataTypes.INTEGER,
@@ -37,6 +40,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "PurchaseOrder",
+      tableName: "purchase_orders",
     }
   );
   return PurchaseOrder;
