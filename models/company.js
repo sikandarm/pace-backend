@@ -15,13 +15,13 @@ module.exports = (sequelize, DataTypes) => {
     {
       name: DataTypes.STRING,
       address: DataTypes.STRING,
-      phone: DataTypes.INTEGER,
-      fax: DataTypes.INTEGER,
+      phone: DataTypes.STRING,
+      fax: DataTypes.STRING,
       email: DataTypes.STRING,
-      created_by: DataTypes.STRING,
+      created_by: DataTypes.INTEGER,
       updated_by: DataTypes.STRING,
       deletedAt: DataTypes.DATE,
-      deletedby: DataTypes.INTEGER,
+      deletedby: DataTypes.STRING,
     },
     {
       sequelize,

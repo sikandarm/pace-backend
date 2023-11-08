@@ -16,22 +16,22 @@ module.exports = {
         type: Sequelize.STRING,
       },
       phone: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
       },
       fax: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
       },
       email: {
         type: Sequelize.STRING,
       },
       created_by: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
       },
       updated_by: {
         type: Sequelize.STRING,
       },
       deletedby: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,
