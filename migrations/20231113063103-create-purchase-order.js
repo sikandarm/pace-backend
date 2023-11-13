@@ -1,5 +1,4 @@
 "use strict";
-
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable("PurchaseOrders", {
@@ -13,7 +12,14 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       company_name: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "companies",
+          key: "id",
+          onDelete: "CASCADE",
+          onUpdate: "CASCADE",
+        },
       },
       address: {
         type: Sequelize.STRING,
@@ -29,6 +35,7 @@ module.exports = {
       },
       po_number: {
         type: Sequelize.INTEGER,
+        allowNull: false,
       },
       order_date: {
         type: Sequelize.DATE,
@@ -37,7 +44,14 @@ module.exports = {
         type: Sequelize.DATE,
       },
       vendor_name: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "vendors",
+          key: "id",
+          onDelete: "CASCADE",
+          onUpdate: "CASCADE",
+        },
       },
       ship_to: {
         type: Sequelize.STRING,
@@ -80,7 +94,6 @@ module.exports = {
       },
     });
   },
-
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable("PurchaseOrders");
   },

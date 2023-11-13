@@ -1,15 +1,16 @@
 // Create a new PurchaseOrder
 
 const { errorResponse, successResponse } = require("../utils/apiResponse");
-const { PurchaseOrder, sequelize } = require("../models");
+const { PurchaseOrder, Company, Vendor, sequelize } = require("../models");
+
 const createPurchaseOrder = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const {
-      company_name,
+      company_id,
       delivery_date,
       confirm_with,
-      vendor_name,
+      vendor_id,
       order_date,
       placed_via,
       po_number,
@@ -22,12 +23,21 @@ const createPurchaseOrder = async (req, res) => {
       term,
       fax,
     } = req.body;
+
+    // Look up company and vendor IDs based on names
+    // const company = await Company.findOne({ where: { name: company_name } });
+    // const vendor = await Vendor.findOne({ where: { vendor_name } });
+    console.log(req.body, "-----------");
+    // if (!company || !vendor) {
+    //   throw new Error("Company or Vendor not found");
+    // }
+
     const purchaseOrder = await PurchaseOrder.create(
       {
-        company_name,
+        company_name: company_id,
         delivery_date,
         confirm_with,
-        vendor_name,
+        vendor_name: vendor_id,
         order_date,
         placed_via,
         po_number,
@@ -43,6 +53,7 @@ const createPurchaseOrder = async (req, res) => {
       },
       { transaction }
     );
+
     await transaction.commit();
     return successResponse(
       res,
@@ -52,7 +63,7 @@ const createPurchaseOrder = async (req, res) => {
     );
   } catch (error) {
     await transaction.rollback();
-    return errorResponse(res, 400, "Something went wrong", error);
+    return errorResponse(res, 400, "Something went wrong", error.message);
   }
 };
 
@@ -63,10 +74,10 @@ const updatePurchaseOrder = async (req, res) => {
   try {
     const purchaseOrderId = req.params.id;
     const {
-      company_name,
+      company_id,
       delivery_date,
       confirm_with,
-      vendor_name,
+      vendor_id,
       order_date,
       placed_via,
       po_number,
@@ -86,10 +97,10 @@ const updatePurchaseOrder = async (req, res) => {
       return errorResponse(res, 404, "PurchaseOrder not found");
     }
 
-    purchaseOrder.company_name = company_name;
+    purchaseOrder.company_name = company_id;
     purchaseOrder.delivery_date = delivery_date;
     purchaseOrder.confirm_with = confirm_with;
-    purchaseOrder.vendor_name = vendor_name;
+    purchaseOrder.vendor_name = vendor_id;
     purchaseOrder.order_date = order_date;
     purchaseOrder.placed_via = placed_via;
     purchaseOrder.po_number = po_number;
@@ -145,35 +156,49 @@ const getAllPurchaseOrders = async (req, res) => {
     const purchaseOrders = await PurchaseOrder.findAll({
       where: whereClause,
       offset: offset,
+      include: [
+        {
+          model: Company,
+          attributes: ["name"],
+          as: "company",
+        },
+        {
+          model: Vendor,
+          attributes: ["vendor_name"],
+          as: "vendor",
+        },
+      ],
     });
 
+    console.log(purchaseOrders, "==============");
     if (!purchaseOrders || purchaseOrders.length === 0) {
       return successResponse(res, 200, { purchaseOrders: [], totalPages });
     }
-    const modifiedPurchaseOrder = purchaseOrders.map((purchaseOrder) => {
-      return {
-        id: purchaseOrder.id,
-        vendor_name: purchaseOrder.vendor_name,
-        company_name: purchaseOrder.company_name,
-        delivery_date: purchaseOrder.delivery_date,
-        confirm_with: purchaseOrder.confirm_with,
-        order_date: purchaseOrder.order_date,
-        placed_via: purchaseOrder.placed_via,
-        po_number: purchaseOrder.po_number,
-        order_by: purchaseOrder.order_by,
-        order_by: purchaseOrder.order_by,
-        ship_via: purchaseOrder.ship_via,
-        phone: purchaseOrder.phone,
-        email: purchaseOrder.email,
-        term: purchaseOrder.term,
-        fax: purchaseOrder.fax,
-      };
-    });
+    // const modifiedPurchaseOrder = purchaseOrders.map((purchaseOrder) => {
+    //   return {
+    //     id: purchaseOrder.id,
+    //     vendor_name: purchaseOrder.vendor_name,
+    //     company_name: purchaseOrder.company_name,
+    //     delivery_date: purchaseOrder.delivery_date,
+    //     confirm_with: purchaseOrder.confirm_with,
+    //     order_date: purchaseOrder.order_date,
+    //     placed_via: purchaseOrder.placed_via,
+    //     po_number: purchaseOrder.po_number,
+    //     order_by: purchaseOrder.order_by,
+    //     order_by: purchaseOrder.order_by,
+    //     ship_via: purchaseOrder.ship_via,
+    //     phone: purchaseOrder.phone,
+    //     email: purchaseOrder.email,
+    //     term: purchaseOrder.term,
+    //     fax: purchaseOrder.fax,
+    //   };
+
+    // });
     return successResponse(
       res,
       200,
       {
-        purchaseOrders: modifiedPurchaseOrder,
+        purchaseOrders: purchaseOrders,
         page: (totalPages, req.query.page),
       },
       "Purchase orders retrieved successfully"
@@ -190,6 +215,7 @@ const getPurchaseOrderById = async (req, res) => {
     const { id } = req.params;
     if (id) {
       const purchaseOrdeById = await PurchaseOrder.findByPk(id);
+
       if (purchaseOrdeById) {
         return successResponse(res, 200, { purchaseOrder: purchaseOrdeById });
       }

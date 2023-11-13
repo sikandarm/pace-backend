@@ -11,13 +11,20 @@ module.exports = (sequelize, DataTypes) => {
       PurchaseOrder.belongsTo(models.Purchase_Order_Items, {
         foreignKey: "id",
       });
+      PurchaseOrder.belongsTo(models.Vendor, {
+        foreignKey: "vendor_name",
+        as: "vendor",
+      });
+      PurchaseOrder.belongsTo(models.Company, {
+        foreignKey: "company_name",
+        as: "company",
+      });
     }
   }
-
   PurchaseOrder.init(
     {
       po_id: DataTypes.INTEGER,
-      company_name: DataTypes.STRING,
+      company_name: DataTypes.INTEGER,
       address: DataTypes.STRING,
       phone: DataTypes.STRING,
       fax: DataTypes.STRING,
@@ -25,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       po_number: DataTypes.INTEGER,
       order_date: DataTypes.DATE,
       delivery_date: DataTypes.DATE,
-      vendor_name: DataTypes.STRING,
+      vendor_name: DataTypes.INTEGER,
       ship_to: DataTypes.STRING,
       ship_via: DataTypes.STRING,
       term: DataTypes.TEXT,
