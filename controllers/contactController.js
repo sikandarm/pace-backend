@@ -150,9 +150,8 @@ exports.deleteContact = async (req, res) => {
     }
 
     const deletedContact = await contact.destroy();
-
     if (deletedContact) {
-      return successResponse(res, 200, null, "Contact deleted successfully");
+      return successResponse(res, 200, deletedContact, "Contact deleted successfully");
     }
 
     return errorResponse(res, 400, "Failed to delete the contact");

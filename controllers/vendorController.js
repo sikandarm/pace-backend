@@ -60,7 +60,9 @@ exports.getAllVendors = async (req, res) => {
     let whereClause = {};
 
     if (vendorName) {
-      whereClause = { vendor_name: vendorName };
+      whereClause = { vendor_name: vendorName , deletedAt : null};
+    }else{
+      whereClause = {deletedAt : null}
     }
 
     const totalCount = await Vendor.count({ where: whereClause });
@@ -83,6 +85,7 @@ exports.getAllVendors = async (req, res) => {
         created_by: vendor.created_by,
         updated_by: vendor.updated_by,
         deleted_by: vendor.deleted_by,
+        deletedAt : vendor.deletedAt
       };
     });
 

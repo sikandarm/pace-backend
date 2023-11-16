@@ -27,7 +27,7 @@ const createPurchaseOrder = async (req, res) => {
     // Look up company and vendor IDs based on names
     // const company = await Company.findOne({ where: { name: company_name } });
     // const vendor = await Vendor.findOne({ where: { vendor_name } });
-    console.log(req.body, "-----------");
+    // console.log(req.body, "-----------");
     // if (!company || !vendor) {
     //   throw new Error("Company or Vendor not found");
     // }
@@ -134,6 +134,12 @@ const updatePurchaseOrder = async (req, res) => {
 const getAllPurchaseOrders = async (req, res) => {
   try {
     const name = req.query.vendor_name;
+    if(name)
+    {
+      const vendor = await Vendor.findOne({where:{vendor_name : name}})
+
+    }
+    // console.log(vendor)
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
     let whereClause = {};
@@ -143,7 +149,7 @@ const getAllPurchaseOrders = async (req, res) => {
     //   deleted_at: null,
     // };
     if (name) {
-      whereClause = { vendor_name: name };
+      whereClause = { vendor_name: vendor.id , deleted_at : null };
     } else {
       whereClause = { deleted_at: null };
     }
@@ -170,7 +176,7 @@ const getAllPurchaseOrders = async (req, res) => {
       ],
     });
 
-    console.log(purchaseOrders, "==============");
+    // console.log(purchaseOrders, "==============");
     if (!purchaseOrders || purchaseOrders.length === 0) {
       return successResponse(res, 200, { purchaseOrders: [], totalPages });
     }
@@ -214,7 +220,18 @@ const getPurchaseOrderById = async (req, res) => {
   try {
     const { id } = req.params;
     if (id) {
-      const purchaseOrdeById = await PurchaseOrder.findByPk(id);
+      const purchaseOrdeById = await PurchaseOrder.findByPk(id, { include: [
+        {
+          model: Company,
+          attributes: ["name"],
+          as: "company",
+        },
+        {
+          model: Vendor,
+          attributes: ["vendor_name"],
+          as: "vendor",
+        },
+      ]});
 
       if (purchaseOrdeById) {
         return successResponse(res, 200, { purchaseOrder: purchaseOrdeById });

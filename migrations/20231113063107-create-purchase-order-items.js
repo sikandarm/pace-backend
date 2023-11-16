@@ -12,7 +12,7 @@ module.exports = {
       po_id: {
         type: Sequelize.INTEGER,
         references: {
-          model: "purchase_orders",
+          model: "purchaseorders",
           key: "id",
           onDelete: "CASCADE",
           onUpdate: "CASCADE",

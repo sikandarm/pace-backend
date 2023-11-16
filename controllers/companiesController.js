@@ -15,7 +15,7 @@ exports.createCompany = async (req, res) => {
         email,
         created_by: req.user.id,
       },
-      { transaction }
+      { transaction } 
     );
 
     await transaction.commit();
@@ -78,8 +78,12 @@ exports.getAllCompanies = async (req, res) => {
     let whereClause = {};
 
     if (name) {
-      whereClause = { name };
+      whereClause = { name , deletedAt:null };  
+    }else{
+      whereClause = {deletedAt:null}
     }
+   
+
     const totalCount = await Company.count({ where: whereClause });
     const totalPages = Math.ceil(totalCount / pageSize);
     const offset = (page - 1) * pageSize;
@@ -102,13 +106,13 @@ exports.getAllCompanies = async (req, res) => {
         email: company.email,
         created_by: company.created_by,
         updated_by: company.updated_by,
+        deletedAt : company.deletedAt,
       };
     });
-
     return successResponse(res, 200, {
       companies: modifiedCompanies,
       page: page,
-    });
+    },);
   } catch (err) {
     console.error(err);
     return errorResponse(res, 500, "Something went wrong", err);
