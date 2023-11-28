@@ -1,7 +1,15 @@
 // Create a new PurchaseOrder
 
 const { errorResponse, successResponse } = require("../utils/apiResponse");
-const { PurchaseOrder, Company, Vendor, sequelize } = require("../models");
+const {
+  PurchaseOrder,
+Purchase_Order_Items,
+  Company,
+  Vendor,
+  User,
+  Inventory,
+  sequelize,
+} = require("../models");
 
 const createPurchaseOrder = async (req, res) => {
   const transaction = await sequelize.transaction();
@@ -11,6 +19,7 @@ const createPurchaseOrder = async (req, res) => {
       delivery_date,
       confirm_with,
       vendor_id,
+      userId,
       order_date,
       placed_via,
       po_number,
@@ -22,6 +31,7 @@ const createPurchaseOrder = async (req, res) => {
       email,
       term,
       fax,
+      status,
     } = req.body;
 
     // Look up company and vendor IDs based on names
@@ -38,6 +48,7 @@ const createPurchaseOrder = async (req, res) => {
         delivery_date,
         confirm_with,
         vendor_name: vendor_id,
+        userId: userId,
         order_date,
         placed_via,
         po_number,
@@ -49,6 +60,7 @@ const createPurchaseOrder = async (req, res) => {
         email,
         term,
         fax,
+        status,
         created_by: req.user.id,
       },
       { transaction }
@@ -89,6 +101,7 @@ const updatePurchaseOrder = async (req, res) => {
       email,
       term,
       fax,
+      status,
     } = req.body;
 
     const purchaseOrder = await PurchaseOrder.findByPk(purchaseOrderId);
@@ -112,6 +125,7 @@ const updatePurchaseOrder = async (req, res) => {
     purchaseOrder.email = email;
     purchaseOrder.term = term;
     purchaseOrder.fax = fax;
+    purchaseOrder.status = status;
     purchaseOrder.updated_by = req.user.id;
 
     await purchaseOrder.save({ transaction });
@@ -134,10 +148,8 @@ const updatePurchaseOrder = async (req, res) => {
 const getAllPurchaseOrders = async (req, res) => {
   try {
     const name = req.query.vendor_name;
-    if(name)
-    {
-      const vendor = await Vendor.findOne({where:{vendor_name : name}})
-
+    if (name) {
+      const vendor = await Vendor.findOne({ where: { vendor_name: name } });
     }
     // console.log(vendor)
     const page = parseInt(req.query.page) || 1;
@@ -149,7 +161,7 @@ const getAllPurchaseOrders = async (req, res) => {
     //   deleted_at: null,
     // };
     if (name) {
-      whereClause = { vendor_name: vendor.id , deleted_at : null };
+      whereClause = { vendor_name: vendor.id, deleted_at: null };
     } else {
       whereClause = { deleted_at: null };
     }
@@ -172,6 +184,11 @@ const getAllPurchaseOrders = async (req, res) => {
           model: Vendor,
           attributes: ["vendor_name"],
           as: "vendor",
+        },
+        {
+          model: User,
+          attributes: ["firstName"],
+          as: "firstName",
         },
       ],
     });
@@ -219,28 +236,49 @@ const getAllPurchaseOrders = async (req, res) => {
 const getPurchaseOrderById = async (req, res) => {
   try {
     const { id } = req.params;
+    //console.log(id)
     if (id) {
-      const purchaseOrdeById = await PurchaseOrder.findByPk(id, { include: [
-        {
-          model: Company,
-          attributes: ["name"],
-          as: "company",
-        },
-        {
-          model: Vendor,
-          attributes: ["vendor_name"],
-          as: "vendor",
-        },
-      ]});
-
+      const purchaseOrdeById = await PurchaseOrder.findByPk(id, {
+        include: [
+          {
+            model: Company,
+            attributes: ["name"],
+            as: "company",
+          },
+          {
+            model: Vendor,
+            attributes: ["vendor_name"],
+            as: "vendor",
+          },
+          {
+            model: User,
+            attributes: ["firstName"],
+            as: "firstName",
+          },
+        ],
+      });
+      
+      const items = await Purchase_Order_Items.findAll({
+         where: {
+        po_id: id,
+      },
+      include: [
+          {
+            model: Inventory,
+            attributes: ["ediStdNomenclature"],
+          },
+        ]
+      })
+      
       if (purchaseOrdeById) {
-        return successResponse(res, 200, { purchaseOrder: purchaseOrdeById });
+        return successResponse(res, 200, { purchaseOrder: purchaseOrdeById , PurchaseOrderItems : items });
       }
     }
   } catch (err) {
     return errorResponse(res, 400, "Something went wrong!", err);
   }
 };
+
 
 // Delete Purchasorder
 
@@ -281,10 +319,126 @@ const deletePurchaseOrder = async (req, res) => {
   }
 };
 
+const getPurchaseOrderByLoginUser = async (req, res) => {
+  const user = req.user;
+  const whereClause = {
+    deleted_at: null,
+  };
+
+  if (user.roles[0] === "Admin") {
+    try {
+      const purchaseOrders = await PurchaseOrder.findAll({
+      //  where: whereClause,
+        include: [
+          {
+            model: Company,
+            attributes: ["name"],
+            as: "company",
+          },
+          {
+            model: Vendor,
+            attributes: ["vendor_name"],
+            as: "vendor",
+          },
+          {
+            model: User,
+            attributes: ["firstName"],
+            as: "firstName",
+          },
+        ],
+      });
+
+      if (purchaseOrders) {
+        return successResponse(
+          res,
+          200,
+          { purchaseOrders },
+          "All PurchaseOrder"
+        );
+      } else {
+        return errorResponse(res, 404, "Not Found");
+      }
+    } catch (error) {
+      return errorResponse(error, 500, "Error fetching data");
+    }
+  } else {
+    try {
+      if (user.id) {
+        const purchaseOrders = await PurchaseOrder.findAll({
+          where: {
+            userId: user.id,
+           // ...whereClause,
+          },
+          include: [
+            {
+              model: Company,
+              attributes: ["name"],
+              as: "company",
+            },
+            {
+              model: Vendor,
+              attributes: ["vendor_name"],
+              as: "vendor",
+            },
+            {
+              model: User,
+              attributes: ["firstName"],
+              as: "firstName",
+            },
+          ],
+        });
+
+        if (purchaseOrders) {
+          return successResponse(
+            res,
+            200,
+            { purchaseOrders },
+            "PurchaseOrder Data"
+          );
+        } else {
+          return errorResponse(res, 404, "Not Found");
+        }
+      }
+    } catch (error) {
+      return errorResponse(error, 500, "Error fetching data");
+    }
+  }
+};
+
+
+const changeStatus = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const purchaseOrder = await PurchaseOrder.findByPk(id);
+
+    if (!purchaseOrder) {
+      return errorResponse(res, 404, "PurchaseOrder not found");
+    }
+
+    purchaseOrder.status = status;
+    await purchaseOrder.save({ transaction });
+    await transaction.commit();
+    return successResponse(
+      res,
+      200,
+      { purchaseOrder },
+      "Status updated successfully"
+    );
+  } catch (err) {
+    console.error(err);
+    await transaction.rollback();
+    return errorResponse(res, 500, "Something went wrong", err);
+  }
+};
+
 module.exports = {
   createPurchaseOrder,
   updatePurchaseOrder,
   getAllPurchaseOrders,
   getPurchaseOrderById,
   deletePurchaseOrder,
+  getPurchaseOrderByLoginUser,
+  changeStatus,
 };

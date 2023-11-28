@@ -64,7 +64,7 @@ const createPurchaseOrderItem = async (req, res) => {
 
 const getAllPurchaseOrderItems = async (req, res) => {
   try {
-    const purchaseOrderItems = await Purchase_Order_Items.findAll();
+    const purchaseOrderItems = await Purchase_Order_Items.findAll( );
 
     return successResponse(
       res,

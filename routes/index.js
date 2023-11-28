@@ -16,18 +16,18 @@ const jobRouter = require("./jobRoutes");
 
 exports.apiRoutes = (app) => {
   app.use("/api/rejected-reasons", rejectedReasonRouter);
-  app.use("/api/purchaseorderitem", purchaseOrderItems);
-  app.use("/api/purchaseorder", purchaseOrderRoutes);
   app.use("/api/notifications", notificationrouter);
   app.use("/api/permission", permissionRouter);
   app.use("/api/inventory", inventoryRouter);
   app.use("/api/CA-report", caReportRouter);
   app.use("/api/contact", contactRouter);
-  app.use("/api/vendor", vendorRouter);
-  app.use("/api/company", companyRouter);
   app.use("/api/task", taskRouter);
   app.use("/api/user", userRouter);
   app.use("/api/auth", authRouter);
   app.use("/api/role", roleRouter);
   app.use("/api/job", jobRouter);
+  app.use("/api/purchaseorderitem", purchaseOrderItems);
+  app.use("/api/purchaseorder", purchaseOrderRoutes);
+  app.use("/api/vendor", vendorRouter);
+  app.use("/api/company", companyRouter);
 };

@@ -19,16 +19,22 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "company_name",
         as: "company",
       });
+    PurchaseOrder.belongsTo(models.User, { foreignKey: "userId" , as:"firstName" });
     }
   }
   PurchaseOrder.init(
     {
-      po_id: DataTypes.INTEGER,
+      
       company_name: DataTypes.INTEGER,
       address: DataTypes.STRING,
       phone: DataTypes.STRING,
       fax: DataTypes.STRING,
       email: DataTypes.STRING,
+      status:DataTypes.STRING,
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
       po_number: DataTypes.INTEGER,
       order_date: DataTypes.DATE,
       delivery_date: DataTypes.DATE,

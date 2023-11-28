@@ -129,8 +129,8 @@ exports.updateTask = async (req, res) => {
       welder,
       painter,
       foreman,
-    } = req.body;
-
+    } = req.body; 
+    
     const jobIdInt = parseInt(jobId);
     const job = await Job.findByPk(jobIdInt);
     if (!job) {
@@ -438,7 +438,7 @@ exports.getRejectedTaskByMonthAndYear = async (req, res) => {
   try {
     // Fetch rejected reasons with parent-child relationships
     const allRejectedReasons = await RejectedReason.findAll();
-
+    
     const rejectedTasks = await Task.findAll({
       where: {
         status: "rejected",
