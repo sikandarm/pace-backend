@@ -1,15 +1,17 @@
 // Create a new PurchaseOrder
 
 const { errorResponse, successResponse } = require("../utils/apiResponse");
+const { toSentenceCase } = require("../utils/stringtosentencecase")
 const {
   PurchaseOrder,
-Purchase_Order_Items,
+  Purchase_Order_Items,
   Company,
   Vendor,
   User,
   Inventory,
   sequelize,
 } = require("../models");
+
 
 const createPurchaseOrder = async (req, res) => {
   const transaction = await sequelize.transaction();
@@ -148,19 +150,11 @@ const updatePurchaseOrder = async (req, res) => {
 const getAllPurchaseOrders = async (req, res) => {
   try {
     const name = req.query.vendor_name;
-    if (name) {
-      const vendor = await Vendor.findOne({ where: { vendor_name: name } });
-    }
-    // console.log(vendor)
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
     let whereClause = {};
-
-    // Define a condition for the search
-    // const searchCondition = {
-    //   deleted_at: null,
-    // };
     if (name) {
+      const vendor = await Vendor.findOne({ where: { vendor_name: name } });
       whereClause = { vendor_name: vendor.id, deleted_at: null };
     } else {
       whereClause = { deleted_at: null };
@@ -192,8 +186,6 @@ const getAllPurchaseOrders = async (req, res) => {
         },
       ],
     });
-
-    // console.log(purchaseOrders, "==============");
     if (!purchaseOrders || purchaseOrders.length === 0) {
       return successResponse(res, 200, { purchaseOrders: [], totalPages });
     }
@@ -257,28 +249,30 @@ const getPurchaseOrderById = async (req, res) => {
           },
         ],
       });
-      
+
       const items = await Purchase_Order_Items.findAll({
-         where: {
-        po_id: id,
-      },
-      include: [
+        where: {
+          po_id: id,
+        },
+        include: [
           {
             model: Inventory,
             attributes: ["ediStdNomenclature"],
           },
-        ]
-      })
-      
+        ],
+      });
+
       if (purchaseOrdeById) {
-        return successResponse(res, 200, { purchaseOrder: purchaseOrdeById , PurchaseOrderItems : items });
+        return successResponse(res, 200, {
+          purchaseOrder: purchaseOrdeById,
+          PurchaseOrderItems: items,
+        });
       }
     }
   } catch (err) {
     return errorResponse(res, 400, "Something went wrong!", err);
   }
 };
-
 
 // Delete Purchasorder
 
@@ -328,7 +322,7 @@ const getPurchaseOrderByLoginUser = async (req, res) => {
   if (user.roles[0] === "Admin") {
     try {
       const purchaseOrders = await PurchaseOrder.findAll({
-      //  where: whereClause,
+        where: whereClause,
         include: [
           {
             model: Company,
@@ -347,7 +341,6 @@ const getPurchaseOrderByLoginUser = async (req, res) => {
           },
         ],
       });
-
       if (purchaseOrders) {
         return successResponse(
           res,
@@ -367,7 +360,7 @@ const getPurchaseOrderByLoginUser = async (req, res) => {
         const purchaseOrders = await PurchaseOrder.findAll({
           where: {
             userId: user.id,
-           // ...whereClause,
+            ...whereClause,
           },
           include: [
             {
@@ -405,19 +398,21 @@ const getPurchaseOrderByLoginUser = async (req, res) => {
   }
 };
 
-
 const changeStatus = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
     const { status } = req.body;
+    const modifiedstatus = toSentenceCase(status);
     const purchaseOrder = await PurchaseOrder.findByPk(id);
 
     if (!purchaseOrder) {
       return errorResponse(res, 404, "PurchaseOrder not found");
     }
 
-    purchaseOrder.status = status;
+    if(modifiedstatus === "Received")
+    {
+       purchaseOrder.status = modifiedstatus;
     await purchaseOrder.save({ transaction });
     await transaction.commit();
     return successResponse(
@@ -426,10 +421,85 @@ const changeStatus = async (req, res) => {
       { purchaseOrder },
       "Status updated successfully"
     );
+    }else{
+    return errorResponse(res, 404, "Not Update Status");
+    }
+   
   } catch (err) {
     console.error(err);
     await transaction.rollback();
     return errorResponse(res, 500, "Something went wrong", err);
+  }
+};
+
+const getItemsByLoginUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    //console.log(id)
+    if (id) {
+      const purchaseOrdeById = await PurchaseOrder.findByPk(id, {
+        include: [
+          {
+            model: Company,
+            attributes: ["name"],
+            as: "company",
+          },
+          {
+            model: Vendor,
+            attributes: ["vendor_name"],
+            as: "vendor",
+          },
+          {
+            model: User,
+            attributes: ["firstName"],
+            as: "firstName",
+          },
+        ],
+      });
+
+      const items = await Purchase_Order_Items.findAll({
+        where: {
+          po_id: id,
+        },
+        include: [
+          {
+            model: Inventory,
+            attributes: ["ediStdNomenclature"],
+          },
+        ],
+      });
+      const Itemsdata = items.map((item) => ({
+        id: item.id,
+        po_id: item.po_id,
+        InventoryItem: item.Inventory.ediStdNomenclature,
+        quantity: item.quantity,
+      }));
+      const Po = {
+        id: purchaseOrdeById.id,
+        companyName: purchaseOrdeById.company.name,
+        vendorName: purchaseOrdeById.vendor.vendor_name,
+        PoNumber: purchaseOrdeById.po_number,
+        createdAt: purchaseOrdeById.createdAt,
+        OrderBy: purchaseOrdeById.order_by,
+        shipTo: purchaseOrdeById.ship_to,
+        shipVia: purchaseOrdeById.ship_via,
+        orderDate: purchaseOrdeById.order_date,
+        deliveryDate: purchaseOrdeById.delivery_date,
+        placedVia: purchaseOrdeById.placed_via,
+      };
+
+      if (purchaseOrdeById) {
+        return successResponse(res, 200, {
+          purchaseOrder: Po,
+          PurchaseOrderItems: Itemsdata,
+        });
+      }else{
+    return errorResponse(res, 400, "Not Found!");
+
+      }
+    }
+  } catch (err) {
+    return errorResponse(res, 400, "Something went wrong!", err);
   }
 };
 
@@ -441,4 +511,5 @@ module.exports = {
   deletePurchaseOrder,
   getPurchaseOrderByLoginUser,
   changeStatus,
+  getItemsByLoginUser,
 };

@@ -6,6 +6,7 @@ const {
   getPurchaseOrderById,
   deletePurchaseOrder,
   getPurchaseOrderByLoginUser,
+  getItemsByLoginUser,
   changeStatus
 } = require("../controllers/purchaseOrderController");
 const verifyJWT = require("../middlewares/verifyJWT");
@@ -23,10 +24,12 @@ router.use(verifyJWT);
 
 // MOBILE API's //
 
+router.route("/getpurchaseorderitems/:id").get(validate(paramValidationRules),getItemsByLoginUser);
 router.route("/getpurchaseOrder").get(getPurchaseOrderByLoginUser);
-router.route("/changestatus/:id").patch(changeStatus);
+router.route("/changestatus/:id").patch(validate(paramValidationRules),changeStatus);
 
 
+// REACT API's //
 router
   .route("/")
   .get(getAllPurchaseOrders)  
