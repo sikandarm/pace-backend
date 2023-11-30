@@ -11,8 +11,13 @@ const paramValidationRules = [
     .withMessage("must be an integer."),
 ];
 
+const sequencetaskValidationRules = [
+  body("sequence_id").notEmpty().withMessage("is required"),
+  body("task_id").notEmpty().withMessage("is required"),
+];
 
 module.exports = {
   sequenceValidationRules,
   paramValidationRules,
+  sequencetaskValidationRules,
 };

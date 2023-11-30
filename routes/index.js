@@ -14,6 +14,7 @@ const taskRouter = require("./taskRoutes");
 const roleRouter = require("./roleRoutes");
 const jobRouter = require("./jobRoutes");
 const sequenceRouter = require("./sequenceRoutes");
+const sequencetaskRouter = require("./sequencetaskRoute");
 
 exports.apiRoutes = (app) => {
   app.use("/api/rejected-reasons", rejectedReasonRouter);
@@ -32,5 +33,6 @@ exports.apiRoutes = (app) => {
   app.use("/api/vendor", vendorRouter);
   app.use("/api/company", companyRouter);
   app.use("/api/sequences", sequenceRouter);
+  app.use("/api/sequencestask", sequencetaskRouter);
 
 };
