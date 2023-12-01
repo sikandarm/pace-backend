@@ -1,7 +1,7 @@
 // Create a new PurchaseOrder
 
 const { errorResponse, successResponse } = require("../utils/apiResponse");
-const { toSentenceCase } = require("../utils/stringtosentencecase")
+const { toSentenceCase } = require("../utils/stringtosentencecase");
 const {
   PurchaseOrder,
   Purchase_Order_Items,
@@ -9,9 +9,9 @@ const {
   Vendor,
   User,
   Inventory,
+  Job,
   sequelize,
 } = require("../models");
-
 
 const createPurchaseOrder = async (req, res) => {
   const transaction = await sequelize.transaction();
@@ -405,26 +405,38 @@ const changeStatus = async (req, res) => {
     const { status } = req.body;
     const modifiedstatus = toSentenceCase(status);
     const purchaseOrder = await PurchaseOrder.findByPk(id);
+    if (purchaseOrder.status === status) {
+      return successResponse(res, 200, "Status Already Set");
+    }
 
     if (!purchaseOrder) {
       return errorResponse(res, 404, "PurchaseOrder not found");
     }
 
-    if(modifiedstatus === "Received")
-    {
-       purchaseOrder.status = modifiedstatus;
-    await purchaseOrder.save({ transaction });
-    await transaction.commit();
-    return successResponse(
-      res,
-      200,
-      { purchaseOrder },
-      "Status updated successfully"
-    );
-    }else{
-    return errorResponse(res, 404, "Not Update Status");
+    if (modifiedstatus === "Received") {
+      purchaseOrder.status = modifiedstatus;
+      await purchaseOrder.save({ transaction });
+      await transaction.commit();
+
+      let createjob;
+      if (purchaseOrder) {
+        createjob = await Job.create({
+          name: purchaseOrder.po_number,
+          po_id: id,
+        });
+      }
+
+      if (createjob) {
+        return successResponse(
+          res,
+          200,
+          { purchaseOrder, createjob },
+          "Status updated successfully And Job Created"
+        );
+      }
+    } else {
+      return errorResponse(res, 404, "Not Update Status");
     }
-   
   } catch (err) {
     console.error(err);
     await transaction.rollback();
@@ -493,9 +505,8 @@ const getItemsByLoginUser = async (req, res) => {
           purchaseOrder: Po,
           PurchaseOrderItems: Itemsdata,
         });
-      }else{
-    return errorResponse(res, 400, "Not Found!");
-
+      } else {
+        return errorResponse(res, 400, "Not Found!");
       }
     }
   } catch (err) {

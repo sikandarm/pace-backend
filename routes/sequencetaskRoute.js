@@ -20,11 +20,11 @@ router
   .get(validate(paramValidationRules), getsequencetask);
 
 router
-  .route("/getindenpendenttask/:id")
+  .route("/indenpendent-task/:id")
   .get(validate(paramValidationRules), getIndependentTasks);
 
 router
-  .route("/updateorcreatesequencetask")
+  .route("/updatesequencetask")
   .post(validate(sequencetaskValidationRules), updatesequencetask);
 
 module.exports = router;
