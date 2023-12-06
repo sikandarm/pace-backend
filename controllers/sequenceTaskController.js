@@ -83,7 +83,7 @@ const updatesequencetask = async (req, res) => {
 
     const existingSequence = await sequence_task.findOne({
       where: {
-        sequence_id: sequence_id,
+        //  sequence_id: sequence_id,
         task_id: task_id,
         ...whereCluse,
       },
@@ -123,21 +123,28 @@ const updatesequencetask = async (req, res) => {
 const getIndependentTasks = async (req, res) => {
   try {
     const { id } = req.params;
-
+    let independentTasks;
     const tasksInSequence = await sequence_task.findAll({
       attributes: ["task_id"],
     });
 
     const taskIdsInSequence = tasksInSequence.map((task) => task.task_id);
 
-    const independentTasks = await Task.findAll({
-      where: 
-         [
+    if (taskIdsInSequence.length > 0) {
+      independentTasks = await Task.findAll({
+        where: [
           sequelize.literal(`id NOT IN (${taskIdsInSequence.join(",")})`),
           { jobId: id },
         ],
-      
-    });
+      });
+    } else {
+      independentTasks = await Task.findAll({
+        where: [
+          // sequelize.literal(`id NOT IN (${taskIdsInSequence.join(",")})`),
+          { jobId: id },
+        ],
+      });
+    }
 
     if (independentTasks.length > 0) {
       return successResponse(res, 200, independentTasks, "Independent Tasks");
@@ -154,8 +161,60 @@ const getIndependentTasks = async (req, res) => {
   }
 };
 
+const getnoassignsequence = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let independentseq;
+    const InSequence = await sequence_task.findAll({
+      where: {
+        deletedAt: null,
+      },
+      attributes: ["sequence_id"],
+    });
+    const taskIdsInSequence = InSequence.map((seq) => seq.sequence_id);
+
+    if (taskIdsInSequence.length > 0) {
+      independentseq = await sequence.findAll({
+        where: [
+          sequelize.literal(`id NOT IN (${taskIdsInSequence.join(",")})`),
+          { job_id: id },
+          { deletedAt: null },
+        ],
+      });
+    } else {
+      independentseq = await sequence.findAll({
+        where: [
+          // sequelize.literal(`id NOT IN (${taskIdsInSequence.join(",")})`),
+          { job_id: id },
+          { deletedAt: null },
+        ],
+      });
+    }
+
+    const modifiedIndependentSeq = independentseq.map((seq) => ({
+      id: seq.id,
+      sequence_name: seq.sequence_name,
+      job_id: seq.job_id,
+      task: [],
+    }));
+
+    const respose = {
+      sequences: modifiedIndependentSeq,
+    };
+
+    if (independentseq.length > 0) {
+      return successResponse(res, 200, respose, "Not Assign Sequence");
+    } else {
+      return successResponse(res, 404, "Not Assign Empty Sequence");
+    }
+  } catch (error) {
+    return errorResponse(res, 400, "Something went wrong!", error);
+  }
+};
+
 module.exports = {
   getsequencetask,
   updatesequencetask,
   getIndependentTasks,
+  getnoassignsequence,
 };

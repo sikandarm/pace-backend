@@ -5,12 +5,12 @@ const getsequence = async (req, res) => {
   try {
     const { id } = req.params;
     const whereCluse = {
-      deletedAt : null
-    }
+      deletedAt: null,
+    };
     const listsequence = await sequence.findAll({
       where: {
         job_id: id,
-        ...whereCluse
+        ...whereCluse,
       },
       include: [
         {
@@ -39,24 +39,24 @@ const createsequencete = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { sequence_name, job_id } = req.body;
-    if(job_id == null){
-     return errorResponse(res, 200, "Job can't be Null");
-
+    if (job_id == null) {
+      return errorResponse(res, 200, "Job can't be Null");
     }
-     const existingSequence = await sequence.findOne({
-       where: {
-         sequence_name: sequence_name,
-         job_id: job_id,
-       },
-     });
+    const existingSequence = await sequence.findOne({
+      where: {
+        sequence_name: sequence_name,
+        job_id: job_id,
+        deletedAt: null,
+      },
+    });
 
-     if (existingSequence) {
-       return errorResponse(
-         res,
-         200,
-         "Sequence with the same name and job already exists"
-       );
-     }
+    if (existingSequence) {
+      return errorResponse(
+        res,
+        200,
+        "Sequence with the same name and job already exists"
+      );
+    }
     const createsequence = await sequence.create(
       {
         sequence_name: sequence_name,
@@ -66,59 +66,53 @@ const createsequencete = async (req, res) => {
       { transaction }
     );
     await transaction.commit();
-   if (createsequence) {
-     return successResponse(
-       res,
-       201,
-       { createsequence },
-       "Sequence created successfully"
-     );
-   } else {
-     return errorResponse(res, 200, "Sequence not created");
-   }
+    if (createsequence) {
+      return successResponse(
+        res,
+        201,
+        { createsequence },
+        "Sequence created successfully"
+      );
+    } else {
+      return errorResponse(res, 200, "Sequence not created");
+    }
   } catch (error) {
     await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong!", error);
   }
 };
 
-const deletesequencete = async (req ,res) =>{
- try {
-   const {id} = req.params;
-   const getsequence = await sequence.findByPk(id);
-   if (!getsequence) {
-     return successResponse(
-       res,
-       200,
-       { getsequence },
-       "No Sequence found"
-     );
-   }
-   // Check if the purchase order has already been deleted
-   if (getsequence.deletedAt === null) {
-     getsequence.deletedBy = req.user.id;
-     getsequence.deletedAt = new Date();
-     await getsequence.save();
+const deletesequencete = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const getsequence = await sequence.findByPk(id);
+    if (!getsequence) {
+      return successResponse(res, 200, { getsequence }, "No Sequence found");
+    }
+    // Check if the purchase order has already been deleted
+    if (getsequence.deletedAt === null) {
+      getsequence.deletedBy = req.user.id;
+      getsequence.deletedAt = new Date();
+      await getsequence.save();
 
-     return successResponse(
-       res,
-       200,
-       { getsequence },
-       "Sequence deleted successfully"
-     );
-   } else {
-     return successResponse(
-       res,
-       200,
-       { getsequence },
-       "Sequence is already deleted"
-     );
-   }
- } catch (err) {
-   return errorResponse(res, 500, "Error while Deleting Sequence", err);
- }
-
-}
+      return successResponse(
+        res,
+        200,
+        { getsequence },
+        "Sequence deleted successfully"
+      );
+    } else {
+      return successResponse(
+        res,
+        200,
+        { getsequence },
+        "Sequence is already deleted"
+      );
+    }
+  } catch (err) {
+    return errorResponse(res, 500, "Error while Deleting Sequence", err);
+  }
+};
 module.exports = {
   getsequence,
   createsequencete,

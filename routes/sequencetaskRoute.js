@@ -11,9 +11,14 @@ const {
   getsequencetask,
   updatesequencetask,
   getIndependentTasks,
+  getnoassignsequence,
 } = require("../controllers/sequenceTaskController");
 
 router.use(verifyJWT);
+
+router
+  .route("/get-noassign-sequence/:id")
+  .get(validate(paramValidationRules), getnoassignsequence);
 
 router
   .route("/getsequenceandtask/:id")
