@@ -26,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
       break_end: {
         type: DataTypes.DATE,
       },
+      comment: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false,

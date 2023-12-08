@@ -27,32 +27,7 @@ const getfebricateditems = async (req, res) => {
           include: [
             {
               model: PurchaseOrder,
-              attributes: [
-                "id",
-                "po_number",
-                "status",
-                "address",
-                "company_name",
-                "vendor_name",
-                "userId",
-              ],
-              include: [
-                {
-                  model: Company,
-                  as: "company",
-                  attributes: ["name", "email"],
-                },
-                {
-                  model: Vendor,
-                  as: "vendor",
-                  attributes: ["vendor_name"],
-                },
-                {
-                  model: User,
-                  attributes: ["firstName"],
-                  as: "firstName",
-                },
-              ],
+              attributes: ["id", "po_number", "status"],
             },
           ],
         },

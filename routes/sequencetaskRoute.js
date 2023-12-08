@@ -12,6 +12,7 @@ const {
   updatesequencetask,
   getIndependentTasks,
   getnoassignsequence,
+  getsequencebyid,
 } = require("../controllers/sequenceTaskController");
 
 router.use(verifyJWT);
@@ -31,5 +32,11 @@ router
 router
   .route("/updatesequencetask")
   .post(validate(sequencetaskValidationRules), updatesequencetask);
+
+// WEB API'S //
+
+router
+  .route("/get-sequence-task/:id")
+  .get(validate(paramValidationRules), getsequencebyid);
 
 module.exports = router;

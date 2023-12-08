@@ -4,7 +4,7 @@ const { breaktasks, Task, sequelize } = require("../models");
 const setbreaktask = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { break_start, break_end, taskid } = req.body;
+    const { break_start, break_end, comment, taskid } = req.body;
     if (break_start) {
       const checkstartbreak = await breaktasks.findAll({
         where: {
@@ -13,20 +13,30 @@ const setbreaktask = async (req, res) => {
         },
       });
       if (checkstartbreak.length > 0) {
-        return successResponse(res, 200, "Break Already Start");
+        const data = null;
+        return successResponse(res, 200, data, "Break Already Start");
       }
 
       const setstartdate = await breaktasks.create(
         {
           task_id: taskid,
           break_start: break_start,
+          break_end: null,
+          comment: comment,
           createdBy: req.user.id,
         },
         { transaction }
       );
       await transaction.commit();
+      const modifiedres = {
+        id: setstartdate.id,
+        task_id: setstartdate.task_id,
+        break_start: setstartdate.break_start,
+        break_end: setstartdate.break_end,
+        comment: setstartdate.comment,
+      };
       if (setstartdate) {
-        return successResponse(res, 200, setstartdate, "Break Start");
+        return successResponse(res, 200, modifiedres, "Break Start");
       }
     }
     if (break_end) {
@@ -49,9 +59,38 @@ const setbreaktask = async (req, res) => {
         task_id: taskid,
         break_end: break_end,
       });
+      const modifiedres = {
+        id: setenddate.id,
+        task_id: setenddate.task_id,
+        break_start: setenddate.break_start,
+        break_end: setenddate.break_end,
+        comment: setenddate.comment,
+      };
       if (setenddate) {
-        return successResponse(res, 200, setenddate, "Break End");
+        return successResponse(res, 200, modifiedres, "Break End");
       }
+    }
+  } catch (error) {
+    return errorResponse(res, 400, "Something went wrong!", error);
+  }
+};
+
+const breakstatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const status = await breaktasks.findAll({
+      where: {
+        task_id: id,
+        break_end: null,
+      },
+    });
+    // if (status.length == 0) {
+    //   return successResponse(res, 200, "Not Break Found");
+    // }
+    if (status[0]?.break_start) {
+      return successResponse(res, 200, true);
+    } else {
+      return successResponse(res, 200, false);
     }
   } catch (error) {
     return errorResponse(res, 400, "Something went wrong!", error);
@@ -60,4 +99,5 @@ const setbreaktask = async (req, res) => {
 
 module.exports = {
   setbreaktask,
+  breakstatus,
 };

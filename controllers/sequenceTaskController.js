@@ -212,9 +212,78 @@ const getnoassignsequence = async (req, res) => {
   }
 };
 
+const getsequencebyid = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sequencetask = await sequence_task.findAll({
+      where: {
+        sequence_id: id,
+      },
+      include: [
+        {
+          model: Task,
+          attributes: ["pmkNumber"],
+        },
+        {
+          model: sequence,
+          attributes: ["sequence_name", "job_id"],
+        },
+      ],
+    });
+    const modifieddata = sequencetask.map((items) => ({
+      id: items.id,
+      sequenceid: items.sequence_id,
+      taskid: items.task_id,
+      TaskName: items.Task.pmkNumber,
+      SequenceName: items.sequence.sequence_name,
+      jobid: items.sequence.job_id,
+    }));
+    if (modifieddata) {
+      return successResponse(res, 200, modifieddata, "SequenceTasks");
+    }
+  } catch (error) {
+    return errorResponse(res, 400, "Something went wrong!", error);
+  }
+};
+const getIndependentTasksbyseqid = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let independentTasks;
+    const tasksInSequence = await sequence_task.findAll({
+      where: {
+        sequence_id: id,
+      },
+      attributes: ["task_id"],
+    });
+
+    const taskIdsInSequence = tasksInSequence.map((task) => task.task_id);
+
+    if (taskIdsInSequence.length > 0) {
+      independentTasks = await Task.findAll({
+        where: [
+          sequelize.literal(`id NOT IN (${taskIdsInSequence.join(",")})`),
+        ],
+      });
+    }
+
+    if (independentTasks.length > 0) {
+      return successResponse(res, 200, independentTasks, "Independent Tasks");
+    } else {
+      return successResponse(
+        res,
+        404,
+        independentTasks,
+        "No Independent Tasks Found"
+      );
+    }
+  } catch (error) {
+    return errorResponse(res, 400, "Something went wrong!", error);
+  }
+};
 module.exports = {
   getsequencetask,
   updatesequencetask,
   getIndependentTasks,
   getnoassignsequence,
+  getsequencebyid,
 };
