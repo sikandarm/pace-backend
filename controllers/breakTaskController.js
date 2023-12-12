@@ -97,7 +97,35 @@ const breakstatus = async (req, res) => {
   }
 };
 
+const breaktasklogs = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const logs = await breaktasks.findAll({
+      where: {
+        task_id: id,
+      },
+    });
+
+    const modifieddata = logs.map((items) => ({
+      id: items.id,
+      task_id: items.task_id,
+      break_start: items.break_start,
+      break_end: items.break_end,
+      comment: items.comment,
+    }));
+
+    if (logs) {
+      return successResponse(res, 200, modifieddata, "Break Task Logs");
+    } else {
+      return successResponse(res, 200, "Not Found Break Task Logs");
+    }
+  } catch (error) {
+    return errorResponse(res, 400, "Something went wrong!", error);
+  }
+};
+
 module.exports = {
   setbreaktask,
   breakstatus,
+  breaktasklogs,
 };

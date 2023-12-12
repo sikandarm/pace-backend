@@ -10,6 +10,9 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       fabricated_items_perjob.belongsTo(models.Job, { foreignKey: "job_Id" });
+      fabricated_items_perjob.belongsTo(models.Purchase_Order_Items, {
+        foreignKey: "poitems_id",
+      });
     }
   }
   fabricated_items_perjob.init(
@@ -23,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       job_Id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      poitems_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },

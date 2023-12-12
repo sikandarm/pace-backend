@@ -123,8 +123,12 @@ const updatesequencetask = async (req, res) => {
 const getIndependentTasks = async (req, res) => {
   try {
     const { id } = req.params;
+    const whereClause = {
+      deletedAt: null,
+    };
     let independentTasks;
     const tasksInSequence = await sequence_task.findAll({
+      where: whereClause,
       attributes: ["task_id"],
     });
 
@@ -135,6 +139,7 @@ const getIndependentTasks = async (req, res) => {
         where: [
           sequelize.literal(`id NOT IN (${taskIdsInSequence.join(",")})`),
           { jobId: id },
+          // whereClause,
         ],
       });
     } else {
@@ -142,6 +147,7 @@ const getIndependentTasks = async (req, res) => {
         where: [
           // sequelize.literal(`id NOT IN (${taskIdsInSequence.join(",")})`),
           { jobId: id },
+          // whereClause,
         ],
       });
     }
@@ -245,45 +251,72 @@ const getsequencebyid = async (req, res) => {
     return errorResponse(res, 400, "Something went wrong!", error);
   }
 };
-const getIndependentTasksbyseqid = async (req, res) => {
+
+// const getIndependentTasksbyseqid = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     let independentTasks;
+//     const tasksInSequence = await sequence_task.findAll({
+//       where: {
+//         sequence_id: id,
+//       },
+//       attributes: ["task_id"],
+//     });
+
+//     const taskIdsInSequence = tasksInSequence.map((task) => task.task_id);
+//     console.log(taskIdsInSequence, "_+_+_+_+_+");
+//     if (taskIdsInSequence.length > 0) {
+//       independentTasks = await Task.findAll({
+//         where: [
+//           sequelize.literal(`id NOT IN (${taskIdsInSequence.join(",")})`),
+//         ],
+//       });
+//     }
+
+//     if (independentTasks.length > 0) {
+//       return successResponse(res, 200, independentTasks, "Independent Tasks");
+//     } else {
+//       return successResponse(
+//         res,
+//         404,
+//         independentTasks,
+//         "No Independent Tasks Found"
+//       );
+//     }
+//   } catch (error) {
+//     return errorResponse(res, 400, "Something went wrong!", error);
+//   }
+// };
+
+const deletesequencetask = async (req, res) => {
   try {
     const { id } = req.params;
-    let independentTasks;
-    const tasksInSequence = await sequence_task.findAll({
+    const deletedata = await sequence_task.findAll({
       where: {
-        sequence_id: id,
+        task_id: id,
+        deletedAt: null,
       },
-      attributes: ["task_id"],
     });
 
-    const taskIdsInSequence = tasksInSequence.map((task) => task.task_id);
+    const deleted = await deletedata[0]?.update({
+      deletedAt: new Date(),
+      deletedBy: req.user.id,
+    });
 
-    if (taskIdsInSequence.length > 0) {
-      independentTasks = await Task.findAll({
-        where: [
-          sequelize.literal(`id NOT IN (${taskIdsInSequence.join(",")})`),
-        ],
-      });
-    }
-
-    if (independentTasks.length > 0) {
-      return successResponse(res, 200, independentTasks, "Independent Tasks");
-    } else {
-      return successResponse(
-        res,
-        404,
-        independentTasks,
-        "No Independent Tasks Found"
-      );
+    if (deleted) {
+      return successResponse(res, 200, "SequenceTasks Deleted");
     }
   } catch (error) {
     return errorResponse(res, 400, "Something went wrong!", error);
   }
 };
+
 module.exports = {
   getsequencetask,
   updatesequencetask,
   getIndependentTasks,
   getnoassignsequence,
   getsequencebyid,
+  deletesequencetask,
+  // getIndependentTasksbyseqid,
 };

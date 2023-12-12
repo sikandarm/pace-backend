@@ -31,6 +31,14 @@ const getfebricateditems = async (req, res) => {
             },
           ],
         },
+        {
+          model: Purchase_Order_Items,
+          attributes: ["inventory_id"],
+          include: {
+            model: Inventory,
+            attributes: ["ediStdNomenclature"],
+          },
+        },
       ],
     });
 
@@ -63,10 +71,10 @@ const getfebricateditems = async (req, res) => {
 const createfabricateditems = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { name, job_Id, quantity } = req.body;
+    const { name, job_Id, quantity, poitems_id } = req.body;
     const existingItem = await fabricated_items_perjob.findOne({
       where: {
-        job_Id: job_Id,
+        name: name,
       },
     });
 
@@ -79,6 +87,7 @@ const createfabricateditems = async (req, res) => {
         name: name,
         quantity: quantity,
         job_Id: job_Id,
+        poitems_id: poitems_id,
       },
       { transaction }
     );
@@ -98,7 +107,7 @@ const updatefabricateditems = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const items = req.params.id;
-    const { name, quantity, job_Id } = req.body;
+    const { name, quantity, job_Id, poitems_id } = req.body;
     const fabricateditems = await fabricated_items_perjob.findByPk(items);
     if (!fabricateditems) {
       return successResponse(res, 200, "No Fabricated Item found");
@@ -108,6 +117,7 @@ const updatefabricateditems = async (req, res) => {
         name: name,
         quantity: quantity,
         job_Id: job_Id,
+        poitems_id: poitems_id,
       },
       { transaction }
     );
@@ -219,6 +229,37 @@ const getpoItems = async (req, res) => {
   }
 };
 
+const getfabricateditemsbyname = async (req, res) => {
+  try {
+    const { name } = req.params;
+    const dataitems = await fabricated_items_perjob.findAll({
+      where: {
+        name: name,
+      },
+      include: {
+        model: Purchase_Order_Items,
+        attributes: ["inventory_id"],
+        include: {
+          model: Inventory,
+          attributes: ["ediStdNomenclature"],
+        },
+      },
+    });
+    const datamodified = dataitems.map((items) => ({
+      id: items.id,
+      name: items.name,
+      quantity: items.quantity,
+      poitems_id: items.poitems_id,
+      POItemName: items.Purchase_Order_Item.Inventory.ediStdNomenclature,
+    }));
+    if (datamodified) {
+      return successResponse(res, 200, datamodified, "Items Found");
+    }
+  } catch (error) {
+    return errorResponse(res, 500, "Error while Fetching", error);
+  }
+};
+
 module.exports = {
   getfebricateditems,
   createfabricateditems,
@@ -226,4 +267,5 @@ module.exports = {
   updatefabricateditems,
   getallfebricateditems,
   getpoItems,
+  getfabricateditemsbyname,
 };

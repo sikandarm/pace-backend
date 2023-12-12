@@ -12,6 +12,7 @@ const {
   updatefabricateditems,
   getallfebricateditems,
   getpoItems,
+  getfabricateditemsbyname,
 } = require("../controllers/fabricated_items_perjob");
 const validate = require("../middlewares/validate");
 
@@ -29,5 +30,6 @@ router.route("/update-fabricated-item/:id").put(updatefabricateditems);
 router.route("/getall-fabricated-item").get(getallfebricateditems);
 
 router.route("/get-poitem-perjob/:id").get(getpoItems);
+router.route("/get-items-byname/:name").get(getfabricateditemsbyname);
 
 module.exports = router;

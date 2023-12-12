@@ -133,7 +133,7 @@ const getallSequences = async (req, res) => {
       include: [
         {
           model: Job,
-          attributes: ["name"],
+          attributes: ["id", "name"],
         },
       ],
     });
@@ -141,6 +141,7 @@ const getallSequences = async (req, res) => {
       id: item.id,
       sequence_name: item.sequence_name,
       Job: item.Job.name,
+      jobid: item.Job.id,
     }));
 
     if (Itemsdata.length > 0) {

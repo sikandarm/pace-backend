@@ -13,6 +13,8 @@ const {
   getIndependentTasks,
   getnoassignsequence,
   getsequencebyid,
+  // getIndependentTasksbyseqid,
+  deletesequencetask,
 } = require("../controllers/sequenceTaskController");
 
 router.use(verifyJWT);
@@ -28,6 +30,9 @@ router
 router
   .route("/indenpendent-task/:id")
   .get(validate(paramValidationRules), getIndependentTasks);
+router
+  .route("/delete-sequence-task/:id")
+  .delete(validate(paramValidationRules), deletesequencetask);
 
 router
   .route("/updatesequencetask")
@@ -38,5 +43,9 @@ router
 router
   .route("/get-sequence-task/:id")
   .get(validate(paramValidationRules), getsequencebyid);
+
+// router
+//   .route("/get-independent-task/:id")
+//   .get(validate(paramValidationRules), getIndependentTasksbyseqid);
 
 module.exports = router;
