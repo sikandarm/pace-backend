@@ -1,4 +1,12 @@
-const { Task, Job, User, RejectedReason, sequelize } = require("../models");
+const {
+  Task,
+  Job,
+  User,
+  RejectedReason,
+  sequence_task,
+  sequence,
+  sequelize,
+} = require("../models");
 const { Op } = require("sequelize");
 const { errorResponse, successResponse } = require("../utils/apiResponse");
 const filterSortPaginate = require("../utils/queryUtil");
@@ -263,10 +271,37 @@ exports.getAllTask = async (req, res) => {
         task.rejectionReason = [];
       }
     });
+    let Sequences = [];
+    if (tasks.length > 0) {
+      const job_id = tasks[0].jobId;
+      const getsequences = await sequence_task.findAll({
+        include: [
+          {
+            model: sequence,
+            attributes: ["sequence_name", "job_id"],
+            include: [
+              {
+                model: Job,
+                attributes: ["name"],
+              },
+            ],
+            where: {
+              job_id: job_id,
+            },
+          },
+        ],
+      });
+      Sequences = getsequences.map((sequenceItem) => ({
+        sequenceName: sequenceItem.sequence.sequence_name,
+        jobId: sequenceItem.sequence.job_id,
+        jobName: sequenceItem.sequence.Job.name,
+      }));
+    }
 
     const responseData = {
       tasks: {
         data: taskData,
+        Sequences,
       },
     };
 
@@ -431,8 +466,6 @@ exports.rejectedTask = async (req, res) => {
     return errorResponse(res, 400, "Something went wrong!", err);
   }
 };
-
-
 
 exports.getRejectedTaskByMonthAndYear = async (req, res) => {
   try {

@@ -8,6 +8,7 @@ const {
   Role,
   DeviceToken,
   Notification,
+  PurchaseOrder,
   sequelize,
 } = require("../models");
 const { errorResponse, successResponse } = require("../utils/apiResponse");
@@ -149,7 +150,7 @@ exports.updateJob = async (req, res) => {
 
 exports.getAlljob = async (req, res) => {
   try {
-    const include = [{ model: Task }];
+    const include = [{ model: Task }, { model: PurchaseOrder }];
     const jobs = await filterSortPaginate(
       Job,
       req.query,
@@ -175,6 +176,7 @@ exports.getAlljob = async (req, res) => {
         endDate: job.endDate,
         totalTasks, // only include totalTasks and completedTasks properties
         completedTasks,
+        po_id: job.po_id,
       };
     });
 

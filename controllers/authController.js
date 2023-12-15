@@ -20,7 +20,6 @@ exports.login = async (req, res) => {
         },
       ],
     });
-
     const comparePwd = await bcrypt.compare(password, user.password);
     if (!comparePwd) {
       return errorResponse(res, 401, "Invalid credentials");
@@ -38,7 +37,6 @@ exports.login = async (req, res) => {
         permissions.push(permission.slug); // Assuming the permission model has a 'name' attribute
       });
     });
-
     // Check if fcm_token is provided and it's different from the existing one (if any)
     if (fcm_token) {
       const existingDeviceToken = await DeviceToken.findOne({

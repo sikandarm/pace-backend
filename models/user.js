@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -17,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       SharedReport,
       Task,
       Notification,
+      PurchaseOrder
     }) {
       // define association here
       this.belongsToMany(Role, {
@@ -28,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(CAReport, { foreignKey: "userId" });
 
       this.hasMany(Task, { foreignKey: "userId" });
+      this.hasMany(PurchaseOrder, { foreignKey: "userId" });
 
       this.hasMany(DeviceToken, { foreignKey: "userId", onDelete: "CASCADE" });
 

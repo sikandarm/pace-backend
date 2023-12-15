@@ -42,6 +42,4 @@ router.route("/:id/approved").patch(approvedTask);
 
 router.route("/:id/rejected").patch(rejectedTask);
 
-
-
 module.exports = router;
