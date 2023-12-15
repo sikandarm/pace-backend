@@ -75,6 +75,8 @@ const createfabricateditems = async (req, res) => {
     const existingItem = await fabricated_items_perjob.findOne({
       where: {
         name: name,
+        // job_Id: job_Id,
+        deletedAt: null,
       },
     });
 
@@ -251,6 +253,7 @@ const getfabricateditemsbyname = async (req, res) => {
       quantity: items.quantity,
       poitems_id: items.poitems_id,
       POItemName: items.Purchase_Order_Item.Inventory.ediStdNomenclature,
+      jobid: items.job_Id,
     }));
     if (datamodified) {
       return successResponse(res, 200, datamodified, "Items Found");
