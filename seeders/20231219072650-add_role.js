@@ -9,6 +9,45 @@ module.exports = {
         {
           name: "Admin",
         },
+        {
+          name: "CEO",
+        },
+        {
+          name: "Receiver",
+        },
+        {
+          name: "Shop Foreman",
+        },
+        {
+          name: "Yardman",
+        },
+        {
+          name: "Fitter",
+        },
+        {
+          name: "Welder",
+        },
+        {
+          name: "Painter",
+        },
+        {
+          name: "Quality Control Inspector",
+        },
+        {
+          name: "Quality Manager",
+        },
+        {
+          name: "Operations Manager",
+        },
+        {
+          name: "Project Manager",
+        },
+        {
+          name: "Shipper",
+        },
+        {
+          name: "Job Site Foreman",
+        },
       ],
       {}
     );
