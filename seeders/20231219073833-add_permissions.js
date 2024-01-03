@@ -84,9 +84,9 @@ module.exports = {
       { name: "Add Company", slug: "add_company", isActive: 1 },
       { name: "Edit Company", slug: "edit_company", isActive: 1 },
       { name: "Delete Company", slug: "delete_company", isActive: 1 },
-      { name: "Add Vendor", slug: "add_vendor", isActive: 1 },
-      { name: "Edit Vendor", slug: "edit_vendor", isActive: 1 },
-      { name: "Delete Vendor", slug: "delete_vendor", isActive: 1 },
+      // { name: "Add Vendor", slug: "add_vendor", isActive: 1 },
+      // { name: "Edit Vendor", slug: "edit_vendor", isActive: 1 },
+      // { name: "Delete Vendor", slug: "delete_vendor", isActive: 1 },
       { name: "Detail Job", slug: "detail_job", isActive: 1 },
       {
         name: "Add Fabricated Items",
@@ -104,6 +104,7 @@ module.exports = {
       { name: "Edit Sequence", slug: "edit_sequence", isActive: 1 },
       { name: "Download Diagram", slug: "download_diagram", isActive: 1 },
       { name: "Make Call", slug: "make_call", isActive: 1 },
+      { name: "View Task Detail", slug: "view_task_detail", isActive: 1 },
     ];
 
     await queryInterface.bulkInsert("permissions", permissionsData, {});

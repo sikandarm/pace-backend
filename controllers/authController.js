@@ -6,6 +6,7 @@ const { errorResponse, successResponse } = require("../utils/apiResponse");
 exports.login = async (req, res) => {
   try {
     const { email, password, fcm_token } = req.body;
+
     if (!email || !password) {
       return errorResponse(res, 400, "All fields are required");
     }

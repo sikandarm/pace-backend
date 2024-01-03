@@ -1,7 +1,9 @@
-// Create a new PurchaseOrder
-
+// const fs = require("fs");
+// const path = require("path");
 const { errorResponse, successResponse } = require("../utils/apiResponse");
 const { toSentenceCase } = require("../utils/stringtosentencecase");
+const sendPushNotification = require("../utils/sendPushNotification");
+const pushNotificationQueue = require("../services/pushNotificationService");
 const {
   PurchaseOrder,
   Purchase_Order_Items,
@@ -11,6 +13,9 @@ const {
   Inventory,
   Job,
   sequelize,
+  DeviceToken,
+  Notification,
+  Role,
 } = require("../models");
 
 const createPurchaseOrder = async (req, res) => {
@@ -68,7 +73,69 @@ const createPurchaseOrder = async (req, res) => {
       { transaction }
     );
 
+    if (purchaseOrder) {
+      // const targetRolesFilePath = path.join(
+      //   __dirname,
+      //   "../config/targetRoles.json"
+      // );
+      // let targetRoles = [];
+      // try {
+      //   if (fs.existsSync(targetRolesFilePath)) {
+      //     const targetRolesData = fs.readFileSync(targetRolesFilePath, "utf8");
+      //     targetRoles = JSON.parse(targetRolesData);
+      //   }
+      // } catch (err) {
+      //   console.error("Error while reading targetRoles file:", err);
+      // }
+      const usersWithTargetRoles = await User.findAll({
+        include: {
+          model: Role,
+          attributes: ["name"],
+          as: "roles",
+          where: {
+            name: "Receiver",
+          },
+        },
+      });
+      // Use a Set to collect unique user IDs
+      const targetUserIdsSet = new Set();
+      usersWithTargetRoles.forEach((user) => {
+        targetUserIdsSet.add(user.id);
+      });
+
+      const targetUserIds = Array.from(targetUserIdsSet);
+
+      const managerTokens = await DeviceToken.findAll({
+        where: { userId: targetUserIds },
+      });
+
+      // Filter out empty or invalid tokens from the array
+      const validManagerTokens = managerTokens
+        .map((token) => token.token)
+        .filter((token) => typeof token === "string" && token.trim() !== "");
+
+      if (validManagerTokens.length > 0) {
+        const registrationTokens = validManagerTokens;
+        const payload = {
+          notification: {
+            title: "Purchase Order",
+            body: `Admin Created New Purchase Order`,
+          },
+        };
+
+        // await pushNotificationQueue.add({ registrationTokens, payload });
+        await sendPushNotification(registrationTokens, payload);
+
+        const notifications = targetUserIds.map((userId) => ({
+          title: payload.notification.title,
+          body: payload.notification.body,
+          userId,
+        }));
+        await Notification.bulkCreate(notifications);
+      }
+    }
     await transaction.commit();
+
     return successResponse(
       res,
       201,
