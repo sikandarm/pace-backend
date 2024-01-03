@@ -33,9 +33,13 @@ const sendmail = async (req, res) => {
       suggestions
     );
     const pdfBuffer = await generatePdfFromHtml(htmlContent);
-    await sendEmail(pdfBuffer);
+    const emailResponse = await sendEmail(pdfBuffer);
 
-    res.status(200).json({ message: "Email sent successfully!" });
+    if (emailResponse === "Email sent successfully") {
+      return successResponse(res, 200, "RFI sent successfully!");
+    } else {
+      return successResponse(res, 200, "RFI  NOT Sent!");
+    }
   } catch (error) {
     return errorResponse(res, 400, "Something went wrong!", error);
   }

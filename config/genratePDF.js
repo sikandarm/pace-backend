@@ -14,26 +14,6 @@ exports.generateHtmlFromFormData = (
   information,
   suggestions
 ) => {
-  const baseCss = fs.readFileSync(
-    path.join(__dirname, "JS", "base.min.css"),
-    "utf-8"
-  );
-  const fancyCss = fs.readFileSync(
-    path.join(__dirname, "JS", "fancy.min.css"),
-    "utf-8"
-  );
-  const mainCss = fs.readFileSync(
-    path.join(__dirname, "JS", "main.css"),
-    "utf-8"
-  );
-  const compatibilityJs = fs.readFileSync(
-    path.join(__dirname, "JS", "compatibility.min.js"),
-    "utf-8"
-  );
-  const theViewerJs = fs.readFileSync(
-    path.join(__dirname, "JS", "theViewer.min.js"),
-    "utf-8"
-  );
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -47,13 +27,7 @@ exports.generateHtmlFromFormData = (
             integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
             crossorigin="anonymous" />
              <style>
-    @page {
-      size: A4;
-      margin: 1cm;
-    }
-    body {
-      margin: 0;
-    }
+    
     .container {
       width: 100% !important;
     }
