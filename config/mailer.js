@@ -23,11 +23,11 @@ exports.sendEmail = async (pdfBuffer) => {
       const mailOptions = {
         from: "pacep8633@gmail.com",
         to: contact.email,
-        subject: "PDF Submission",
-        text: `Please find the attached PDF document.`,
+        subject: "RIF",
+        text: `Request For Information`,
         attachments: [
           {
-            filename: "RFI_Request.pdf",
+            filename: "RFI.pdf",
             content: pdfBuffer,
             encoding: "base64",
           },

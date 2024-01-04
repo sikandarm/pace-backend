@@ -103,7 +103,7 @@ exports.socialLogin = async (req, res) => {
   const transaction = await sequelize.transaction();
 
   try {
-    const { email, Uid, name, roleId, fcm_token } = req.body;
+    const { email, Uid, name, roleId, phone, fcm_token } = req.body;
 
     if (!email || !Uid) {
       return errorResponse(res, 400, "All fields are required");
@@ -120,14 +120,19 @@ exports.socialLogin = async (req, res) => {
       ],
     });
 
-    if (!users) {
-      const usercreate = await User.create({
-        firstName: name,
-        lastName: name,
-        email: email,
-        Uid: Uid,
-        password: Uid,
-      });
+    if (users === null) {
+      const usercreate = await User.create(
+        {
+          firstName: name,
+          lastName: name,
+          email: email,
+          phone: phone,
+          Uid: Uid,
+          password: Uid,
+        },
+        { transaction }
+      );
+
       if (roleId) {
         await usercreate.addRole(roleId, { transaction });
       }
@@ -207,7 +212,26 @@ exports.socialLogin = async (req, res) => {
 exports.checkuserrole = async (req, res) => {
   try {
     const { email } = req.body;
+    const user = await User.findAll({
+      where: {
+        email: email,
+      },
+    });
+    if (user) {
+      const role = await UserRole.findAll({
+        where: {
+          userId: user[0]?.id,
+        },
+      });
+      if (role) {
+        return successResponse(res, 200, true, "User Exist in Role");
+      } else {
+        return successResponse(res, 200, false, "User Not Exist any Role");
+      }
+    } else {
+      return successResponse(res, 200, false, "User Not Exist any Role");
+    }
   } catch (error) {
-    return errorResponse(res, 400, "Something went wrong", err);
+    return errorResponse(res, 400, "Something went wrong", error);
   }
 };

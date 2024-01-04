@@ -9,6 +9,8 @@ router.route("/login").post(requestLimiter, authController.login);
 
 router.route("/socialLogin").post(authController.socialLogin);
 
+router.route("/check-user-role").get(authController.checkuserrole);
+
 // router.route('/refresh').get(authController.refresh);
 // router.use(verifyJWT);
 router.route("/logout").post(authController.logout);
