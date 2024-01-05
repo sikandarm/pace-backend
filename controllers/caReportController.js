@@ -1,12 +1,20 @@
-const { CAReport, User, SharedReport, sequelize } = require("../models");
+const {
+  CAReport,
+  User,
+  SharedReport,
+  sequelize,
+  DeviceToken,
+  Role,
+  Notification,
+} = require("../models");
 const { errorResponse, successResponse } = require("../utils/apiResponse");
 
 const filterSortPaginate = require("../utils/queryUtil");
 const parseDate = require("../utils/parseDate");
+const sendPushNotification = require("../utils/sendPushNotification");
 
 exports.createCAReort = async (req, res) => {
   const transaction = await sequelize.transaction();
-
   try {
     let {
       originatorName,
@@ -68,6 +76,57 @@ exports.createCAReort = async (req, res) => {
     );
 
     await transaction.commit();
+    if (caReport) {
+      const targetRoles = ["Quality Manager"];
+
+      const usersWithTargetRoles = await User.findAll({
+        include: {
+          model: Role,
+          attributes: ["name"],
+          as: "roles",
+          where: {
+            name: targetRoles, // Use an array to match multiple roles
+          },
+        },
+      });
+
+      // Use a Set to collect unique user IDs
+      const targetUserIdsSet = new Set();
+      usersWithTargetRoles.forEach((user) => {
+        targetUserIdsSet.add(user.id);
+      });
+
+      const targetUserIds = Array.from(targetUserIdsSet);
+
+      const managerTokens = await DeviceToken.findAll({
+        where: { userId: targetUserIds },
+      });
+
+      // Filter out empty or invalid tokens from the array
+      const validManagerTokens = managerTokens
+        .map((token) => token.token)
+        .filter((token) => typeof token === "string" && token.trim() !== "");
+
+      if (validManagerTokens.length > 0) {
+        const registrationTokens = validManagerTokens;
+        const payload = {
+          notification: {
+            title: "Submited CAR",
+            body: `${usersWithTargetRoles[0].firstName} Submited CAR`,
+          },
+        };
+
+        // await pushNotificationQueue.add({ registrationTokens, payload });
+        await sendPushNotification(registrationTokens, payload);
+
+        const notifications = targetUserIds.map((userId) => ({
+          title: payload.notification.title,
+          body: payload.notification.body,
+          userId,
+        }));
+        await Notification.bulkCreate(notifications);
+      }
+    }
     return successResponse(
       res,
       200,
@@ -295,8 +354,6 @@ exports.getSharedReportsByUserId = async (req, res) => {
     return errorResponse(res, 500, "Something went wrong!", err);
   }
 };
-
-
 
 exports.updateReportStatus = async (req, res) => {
   const transaction = await sequelize.transaction();

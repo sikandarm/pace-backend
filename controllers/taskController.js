@@ -6,12 +6,16 @@ const {
   sequence_task,
   sequence,
   sequelize,
+  DeviceToken,
+  Role,
+  Notification,
 } = require("../models");
 const { Op } = require("sequelize");
 const { errorResponse, successResponse } = require("../utils/apiResponse");
 const filterSortPaginate = require("../utils/queryUtil");
 const { uploadFile, rollbackUploads } = require("../utils/fileUpload");
 const parseDate = require("../utils/parseDate");
+const sendPushNotification = require("../utils/sendPushNotification");
 
 exports.createTask = async (req, res) => {
   const transaction = await sequelize.transaction();
@@ -169,7 +173,58 @@ exports.updateTask = async (req, res) => {
     }
     if (completedAt) {
       completedAt = parseDate(completedAt);
+
+      const targetRoles = ["Quality Control Inspector", "Project Manager"];
+
+      const usersWithTargetRoles = await User.findAll({
+        include: {
+          model: Role,
+          attributes: ["name"],
+          as: "roles",
+          where: {
+            name: targetRoles, // Use an array to match multiple roles
+          },
+        },
+      });
+
+      // Use a Set to collect unique user IDs
+      const targetUserIdsSet = new Set();
+      usersWithTargetRoles.forEach((user) => {
+        targetUserIdsSet.add(user.id);
+      });
+
+      const targetUserIds = Array.from(targetUserIdsSet);
+
+      const managerTokens = await DeviceToken.findAll({
+        where: { userId: targetUserIds },
+      });
+
+      // Filter out empty or invalid tokens from the array
+      const validManagerTokens = managerTokens
+        .map((token) => token.token)
+        .filter((token) => typeof token === "string" && token.trim() !== "");
+
+      if (validManagerTokens.length > 0) {
+        const registrationTokens = validManagerTokens;
+        const payload = {
+          notification: {
+            title: "Task Completed",
+            body: `${usersWithTargetRoles[0].firstName} Completed a Task`,
+          },
+        };
+
+        // await pushNotificationQueue.add({ registrationTokens, payload });
+        await sendPushNotification(registrationTokens, payload);
+
+        const notifications = targetUserIds.map((userId) => ({
+          title: payload.notification.title,
+          body: payload.notification.body,
+          userId,
+        }));
+        await Notification.bulkCreate(notifications);
+      }
     }
+
     if (approvedAt) {
       approvedAt = parseDate(approvedAt);
     }
@@ -208,6 +263,7 @@ exports.updateTask = async (req, res) => {
     );
 
     await transaction.commit();
+
     return successResponse(res, 200, { task }, "Task updated successfully!");
   } catch (err) {
     await transaction.rollback();

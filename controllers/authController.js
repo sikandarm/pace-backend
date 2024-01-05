@@ -211,25 +211,117 @@ exports.socialLogin = async (req, res) => {
 
 exports.checkuserrole = async (req, res) => {
   try {
-    const { email } = req.body;
+    const email = req.params.email;
     const user = await User.findAll({
       where: {
         email: email,
       },
     });
-    if (user) {
+    if (user.length > 0) {
       const role = await UserRole.findAll({
         where: {
           userId: user[0]?.id,
         },
       });
-      if (role) {
+      if (role.length > 0) {
         return successResponse(res, 200, true, "User Exist in Role");
       } else {
         return successResponse(res, 200, false, "User Not Exist any Role");
       }
     } else {
-      return successResponse(res, 200, false, "User Not Exist any Role");
+      return successResponse(res, 200, false, "User Not Found");
+    }
+  } catch (error) {
+    return errorResponse(res, 400, "Something went wrong", error);
+  }
+};
+
+exports.checkuserphone = async (req, res) => {
+  try {
+    const email = req.params.email;
+    const users = await User.findAll({
+      where: {
+        email: email,
+      },
+    });
+
+    if (users.length > 0) {
+      const user = users[0];
+      const checkphone = await User.findAll({
+        where: {
+          email: user.email,
+          phone: user.phone,
+        },
+        attributes: ["phone"],
+      });
+
+      if (checkphone[0]?.phone != "") {
+        return successResponse(
+          res,
+          200,
+          checkphone[0].phone,
+          "User Phone Exist"
+        );
+      } else {
+        return successResponse(res, 200, false, "User Phone Not Exist");
+      }
+    } else {
+      return successResponse(res, 200, null, "User Phone Not Exist");
+    }
+  } catch (error) {
+    return errorResponse(res, 400, "Something went wrong", error);
+  }
+};
+
+exports.checkfbData = async (req, res) => {
+  try {
+    const Uid = req.params.Uid;
+    const users = await User.findAll({
+      where: {
+        Uid: Uid,
+      },
+    });
+
+    if (users.length > 0) {
+      const user = users[0];
+      const checkphone = await User.findAll({
+        where: {
+          email: user.email,
+          phone: user.phone,
+        },
+        attributes: ["phone", "email"],
+      });
+      const role = await UserRole.findAll({
+        where: {
+          userId: user.id,
+        },
+      });
+
+      if (checkphone[0]?.phone != "" && role.length > 0) {
+        const data = {
+          fbdata: checkphone[0],
+          assignrole: true,
+        };
+        return successResponse(res, 200, data, "User Data Exist");
+      } else {
+        const data = {
+          fbdata: {
+            phone: null,
+            email: null,
+          },
+          assignrole: false,
+        };
+        return successResponse(res, 200, data, "User Data Not Exist");
+      }
+    } else {
+      const data = {
+        fbdata: {
+          phone: null,
+          email: null,
+        },
+        assignrole: false,
+      };
+      return successResponse(res, 200, data, "User Data Not Exist");
     }
   } catch (error) {
     return errorResponse(res, 400, "Something went wrong", error);

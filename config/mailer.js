@@ -5,7 +5,7 @@ const { Contact } = require("../models");
 
 exports.sendEmail = async (pdfBuffer) => {
   const transporter = nodemailer.createTransport({
-    service: process.env.SMTP_SERVICE || "gmail",
+    service: process.env.SMTP_SERVICE,
     auth: {
       user: process.env.SMTP_MAIL || "pacep8633@gmail.com",
       pass: process.env.SMTP_PASS || "zexyoyycvhpdnhea",
@@ -18,6 +18,12 @@ exports.sendEmail = async (pdfBuffer) => {
     if (!contacts || contacts.length === 0) {
       return "No contacts found";
     }
+    const date = new Date(); // Replace this with your actual date
+
+    const options = { year: "numeric", month: "short", day: "2-digit" };
+    const formattedDate = new Intl.DateTimeFormat("en-US", options).format(
+      date
+    );
 
     for (const contact of contacts) {
       const mailOptions = {
@@ -27,7 +33,7 @@ exports.sendEmail = async (pdfBuffer) => {
         text: `Request For Information`,
         attachments: [
           {
-            filename: "RFI.pdf",
+            filename: `RFI (${formattedDate}).pdf`,
             content: pdfBuffer,
             encoding: "base64",
           },

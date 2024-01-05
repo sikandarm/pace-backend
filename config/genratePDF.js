@@ -27,6 +27,9 @@ exports.generateHtmlFromFormData = (
             integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
             crossorigin="anonymous" />
         <style>
+        html {
+  -webkit-print-color-adjust: exact;
+}
         .container {
             width: 95%;
             margin: auto;
@@ -61,11 +64,7 @@ exports.generateHtmlFromFormData = (
             padding: 8px;
         }
 
-        h5 {
-            background-color: rgba(187, 174, 174, 0.685);
-            margin-bottom: 20px;
-            padding: 10px;
-        }
+      
 
        .revision-container {
             /* border: 1px solid black; */
@@ -206,11 +205,11 @@ exports.generateHtmlFromFormData = (
 
             <div class="row mt-3">
                 <div class="col-md-12">
-                    <h5
-                        style="background-color: rgba(187, 174, 174, 0.685); margin-bottom: 100px;">
+                    <h6
+                        style="background-color: rgba(187, 174, 174, 0.685); margin-bottom: 50px;">
                         FINAL ACTION (include documents changed or affected by
                         the closure of the RFI):
-                    </h5>
+                    </h6>
                 </div>
             </div>
 
