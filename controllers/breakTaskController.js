@@ -55,6 +55,11 @@ const setbreaktask = async (req, res) => {
             },
           },
         });
+        const taskdata = await Task.findAll({
+          where: {
+            id: taskid,
+          },
+        });
         // Use a Set to collect unique user IDs
         const targetUserIdsSet = new Set();
         usersWithTargetRoles.forEach((user) => {
@@ -77,7 +82,7 @@ const setbreaktask = async (req, res) => {
           const payload = {
             notification: {
               title: "Task Start",
-              body: `${usersWithTargetRoles[0].firstName} Started a Task`,
+              body: `pmkNumber# ${taskdata[0]?.pmkNumber} Task Started`,
             },
           };
 

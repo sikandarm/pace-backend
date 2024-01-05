@@ -77,7 +77,7 @@ exports.createCAReort = async (req, res) => {
 
     await transaction.commit();
     if (caReport) {
-      const targetRoles = ["Quality Manager"];
+      const targetRoles = ["Admin"];
 
       const usersWithTargetRoles = await User.findAll({
         include: {
@@ -85,7 +85,7 @@ exports.createCAReort = async (req, res) => {
           attributes: ["name"],
           as: "roles",
           where: {
-            name: targetRoles, // Use an array to match multiple roles
+            name: targetRoles,
           },
         },
       });
@@ -112,7 +112,7 @@ exports.createCAReort = async (req, res) => {
         const payload = {
           notification: {
             title: "Submited CAR",
-            body: `${usersWithTargetRoles[0].firstName} Submited CAR`,
+            body: `${user.firstName} Submited CAR`,
           },
         };
 

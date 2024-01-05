@@ -199,6 +199,11 @@ exports.updateTask = async (req, res) => {
         where: { userId: targetUserIds },
       });
 
+      const taskdata = await Task.findAll({
+        where: {
+          id: taskId,
+        },
+      });
       // Filter out empty or invalid tokens from the array
       const validManagerTokens = managerTokens
         .map((token) => token.token)
@@ -209,7 +214,7 @@ exports.updateTask = async (req, res) => {
         const payload = {
           notification: {
             title: "Task Completed",
-            body: `${usersWithTargetRoles[0].firstName} Completed a Task`,
+            body: `pmkNumber# ${taskdata[0]?.pmkNumber} Task Has been Completed`,
           },
         };
 
