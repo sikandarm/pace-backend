@@ -9,7 +9,7 @@ const {
   User,
 } = require("../models");
 const sendPushNotification = require("../utils/sendPushNotification");
-
+const { formatTime } = require("../utils/timeConverter");
 const setbreaktask = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
@@ -26,12 +26,15 @@ const setbreaktask = async (req, res) => {
         return successResponse(res, 200, data, "Break Already Start");
       }
 
+      const task = await Task.findByPk(taskid);
+
       const setstartdate = await breaktasks.create(
         {
           task_id: taskid,
           break_start: break_start,
           break_end: null,
           comment: comment,
+          task_status: task.status,
           createdBy: req.user.id,
         },
         { transaction }
@@ -120,6 +123,23 @@ const setbreaktask = async (req, res) => {
         task_id: taskid,
         break_end: break_end,
       });
+      if (setenddate) {
+        const prvData2 = await breaktasks.findAll({
+          where: {
+            task_id: taskid,
+          },
+        });
+
+        for (const breakTask of prvData2) {
+          const time1 = new Date(breakTask.break_start).getTime();
+          const time2 = new Date(breakTask.break_end).getTime();
+          const totaltime = time2 - time1;
+          const time = formatTime(totaltime);
+          await breakTask.update({
+            total_time: time,
+          });
+        }
+      }
       const modifiedres = {
         id: setenddate.id,
         task_id: setenddate.task_id,

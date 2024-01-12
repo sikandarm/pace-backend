@@ -131,6 +131,11 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 0.0,
         allowNull: false,
       },
+      task_iteration: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 0,
+      },
     },
     {
       sequelize,

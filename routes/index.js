@@ -18,6 +18,7 @@ const sequencetaskRouter = require("./sequencetaskRoute");
 const fabricated_items = require("./fabricated_items_perjobRoutes");
 const breaktask = require("./breakTaskRoutes");
 const rfiRoutes = require("./rfiRoutes");
+const shippingListRoutes = require("./shippingListRoutes");
 
 exports.apiRoutes = (app) => {
   app.use("/api/rejected-reasons", rejectedReasonRouter);
@@ -40,4 +41,5 @@ exports.apiRoutes = (app) => {
   app.use("/api/fabricated-items", fabricated_items);
   app.use("/api/break-task", breaktask);
   app.use("/api/mail", rfiRoutes);
+  app.use("/api/bill", shippingListRoutes);
 };

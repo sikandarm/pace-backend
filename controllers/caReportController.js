@@ -303,8 +303,40 @@ exports.createSharedReport = async (req, res) => {
     const createdSharedReports = await SharedReport.bulkCreate(sharedReports, {
       transaction,
     });
+    if (createdSharedReports) {
+      for (const sharedReport of createdSharedReports) {
+        const userTokens = await DeviceToken.findAll({
+          where: { userId: sharedReport.userId },
+        });
+
+        const validUserTokens = userTokens
+          .map((token) => token.token)
+          .filter((token) => typeof token === "string" && token.trim() !== "");
+
+        if (validUserTokens.length > 0) {
+          const registrationTokens = validUserTokens;
+          const payload = {
+            notification: {
+              title: "Car",
+              body: `Car Is Shared.`,
+            },
+          };
+
+          await sendPushNotification(registrationTokens, payload);
+
+          const notification = {
+            title: payload.notification.title,
+            body: payload.notification.body,
+            userId: sharedReport.userId,
+          };
+
+          await Notification.create(notification, { transaction });
+        }
+      }
+    }
 
     await transaction.commit();
+
     return successResponse(
       res,
       200,
@@ -312,6 +344,7 @@ exports.createSharedReport = async (req, res) => {
       "Reports shared successfully!"
     );
   } catch (err) {
+    await transaction.rollback();
     return errorResponse(res, 500, "Something went wrong!", err);
   }
 };

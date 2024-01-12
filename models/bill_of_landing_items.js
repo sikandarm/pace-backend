@@ -1,40 +1,37 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class fabricated_items_perjob extends Model {
+  class bill_of_landing_items extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
-      fabricated_items_perjob.belongsTo(models.Job, { foreignKey: "job_Id" });
-      fabricated_items_perjob.belongsTo(models.Purchase_Order_Items, {
-        foreignKey: "poitems_id",
+      bill_of_landing_items.belongsTo(models.PurchaseOrder, {
+        foreignKey: "purchase_order",
       });
-      fabricated_items_perjob.hasMany(models.bill_of_landing_items, {
+      bill_of_landing_items.belongsTo(models.fabricated_items_perjob, {
         foreignKey: "fabricated_items",
+      });
+      bill_of_landing_items.hasMany(models.bill_of_lading, {
+        foreignKey: "bill_lading_items",
       });
     }
   }
-  fabricated_items_perjob.init(
+  bill_of_landing_items.init(
     {
-      name: {
-        type: DataTypes.STRING,
+      fabricated_items: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      purchase_order: {
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
       quantity: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      job_Id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      poitems_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
       },
       createdAt: {
         allowNull: false,
@@ -63,8 +60,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "fabricated_items_perjob",
+      modelName: "bill_of_landing_items",
     }
   );
-  return fabricated_items_perjob;
+  return bill_of_landing_items;
 };

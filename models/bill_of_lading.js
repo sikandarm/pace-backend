@@ -1,84 +1,84 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class breaktasks extends Model {
+  class bill_of_lading extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
-      breaktasks.belongsTo(models.Task, {
-        foreignKey: "task_id",
+      bill_of_lading.belongsTo(models.bill_of_landing_items, {
+        foreignKey: "bill_lading_items",
+      });
+      bill_of_lading.belongsTo(models.Company, {
+        foreignKey: "company_id",
       });
     }
   }
-  breaktasks.init(
+  bill_of_lading.init(
     {
-      task_id: {
-        type: DataTypes.INTEGER,
+      billTitle: {
+        type: DataTypes.STRING,
         allowNull: false,
       },
-      break_start: {
-        type: DataTypes.DATE,
-      },
-      break_end: {
-        type: DataTypes.DATE,
-      },
-      comment: {
+      address: {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      task_iteration: {
-        type: DataTypes.INTEGER,
+      dilveryDate: {
+        type: DataTypes.DATE,
         allowNull: true,
-        defaultValue: 0,
       },
-      task_status: {
-        type: DataTypes.ENUM(
-          "in_process",
-          "pending",
-          "rejected",
-          "approved",
-          "to_inspect"
-        ),
-        allowNull: false,
-        defaultValue: "pending",
+      orderDate: {
+        type: DataTypes.DATE,
+        allowNull: true,
       },
-      total_time: {
+      terms: {
         type: DataTypes.STRING,
         allowNull: true,
+      },
+      shipVia: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      bill_lading_items: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      company_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
       },
       createdAt: {
-        type: DataTypes.DATE,
         allowNull: false,
+        type: DataTypes.DATE,
       },
       createdBy: {
-        type: DataTypes.INTEGER,
         allowNull: true,
+        type: DataTypes.INTEGER,
       },
       updatedAt: {
-        type: DataTypes.DATE,
         allowNull: true,
+        type: DataTypes.DATE,
       },
       updatedBy: {
-        type: DataTypes.INTEGER,
         allowNull: true,
+        type: DataTypes.INTEGER,
       },
       deletedAt: {
-        type: DataTypes.DATE,
         allowNull: true,
+        type: DataTypes.DATE,
       },
       deletedBy: {
-        type: DataTypes.INTEGER,
         allowNull: true,
+        type: DataTypes.INTEGER,
       },
     },
     {
       sequelize,
-      modelName: "breaktasks",
+      modelName: "bill_of_lading",
     }
   );
-  return breaktasks;
+  return bill_of_lading;
 };

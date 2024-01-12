@@ -24,6 +24,9 @@ module.exports = (sequelize, DataTypes) => {
         as: "firstName",
       });
       PurchaseOrder.hasMany(models.Job, { foreignKey: "po_id" });
+      PurchaseOrder.hasMany(models.bill_of_landing_items, {
+        foreignKey: "purchase_order",
+      });
     }
   }
   PurchaseOrder.init(

@@ -9,6 +9,7 @@ const {
   DeviceToken,
   Role,
   Notification,
+  breaktasks,
 } = require("../models");
 const { Op } = require("sequelize");
 const { errorResponse, successResponse } = require("../utils/apiResponse");
@@ -16,6 +17,8 @@ const filterSortPaginate = require("../utils/queryUtil");
 const { uploadFile, rollbackUploads } = require("../utils/fileUpload");
 const parseDate = require("../utils/parseDate");
 const sendPushNotification = require("../utils/sendPushNotification");
+const { previousDay } = require("date-fns");
+const { formatTime } = require("../utils/timeConverter");
 
 exports.createTask = async (req, res) => {
   const transaction = await sequelize.transaction();
@@ -117,6 +120,7 @@ exports.updateTask = async (req, res) => {
   try {
     const taskId = req.params.id;
     let task = await Task.findByPk(taskId);
+    const previousAlt = task.task_iteration;
 
     if (!task) {
       return errorResponse(res, 404, `Task with id ${taskId} not found`);
@@ -142,6 +146,66 @@ exports.updateTask = async (req, res) => {
       painter,
       foreman,
     } = req.body;
+
+    let newstatus = status;
+    let task_alt;
+
+    if (newstatus === "rejected" && previousAlt <= 2) {
+      if (previousAlt < 2) {
+        newstatus = "pending";
+      }
+      task_alt = previousAlt + 1;
+      try {
+        const breaktaskes = await breaktasks.findAll({
+          where: {
+            task_id: taskId,
+            task_iteration: 0,
+          },
+        });
+        for (let index = 0; index < breaktaskes.length; index++) {
+          const data = await breaktaskes[index].update({
+            task_iteration: task_alt,
+          });
+        }
+      } catch (error) {
+        console.error("Error updating breaktaskes:");
+      }
+    }
+
+    if (newstatus === "rejected") {
+      const breakes = await breaktasks.findAll({
+        where: {
+          task_id: taskId,
+        },
+      });
+
+      let totalHours = 0;
+      let totalMinutes = 0;
+
+      breakes.forEach((item) => {
+        const [, hours, minutes] = item.total_time.match(
+          /(\d+) hours, (\d+\.\d+) minutes/
+        );
+        totalHours += parseInt(hours, 10);
+        totalMinutes += parseFloat(minutes);
+      });
+
+      // Adjust totalMinutes if it exceeds 59
+      totalHours += Math.floor(totalMinutes / 60);
+      totalMinutes %= 60;
+
+      const totalTime = `${totalHours} hours, ${totalMinutes.toFixed(
+        2
+      )} minutes`;
+
+      console.log(totalTime);
+
+      await breaktasks.create({
+        task_id: taskId,
+        task_status: "rejected",
+        total_time: totalTime,
+      });
+    }
 
     const jobIdInt = parseInt(jobId);
     const job = await Job.findByPk(jobIdInt);
@@ -256,13 +320,14 @@ exports.updateTask = async (req, res) => {
         comments,
         image,
         rejectionReason,
-        status,
+        status: newstatus,
         projectManager,
         QCI,
         fitter,
         welder,
         painter,
         foreman,
+        task_iteration: task_alt,
       },
       { transaction }
     );
