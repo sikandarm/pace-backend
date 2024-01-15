@@ -9,7 +9,7 @@ exports.generateHtmlFromFormData = (
   reference,
   RFI_N,
   OF,
-  date,
+  formattedDate,
   cc,
   information,
   suggestions
@@ -99,14 +99,13 @@ exports.generateHtmlFromFormData = (
                         <div class="vertical-line"></div>
                         <div>
                             <label>Date</label>
-                            <p style="margin-top: 11px;">${date}</p>
+                            <p style="margin-top: 11px;">${formattedDate}</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-4" style="border: 1px solid black;">
-                    <h6>Reynolds Welding & Fabrication LLC,<br />
-                        148 Addison Road,<br />
-                        Windsor, CT 06095
+                    <h6>
+                   
                     </h6>
                 </div>
                 <div class="col-4">
@@ -150,7 +149,7 @@ exports.generateHtmlFromFormData = (
                             </tr>
                             <tr>
                                 <th scope="row">DATE:</th>
-                                <td>${date}</td>
+                                <td>${formattedDate}</td>
                             </tr>
                             <tr>
                                 <th scope="row">CC:</th>

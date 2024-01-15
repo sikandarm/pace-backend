@@ -165,19 +165,22 @@ exports.updateTask = async (req, res) => {
         for (let index = 0; index < breaktaskes.length; index++) {
           const data = await breaktaskes[index].update({
             task_iteration: task_alt,
+            task_status: "rejected",
           });
         }
       } catch (error) {
         console.error("Error updating breaktaskes:");
       }
     }
-
+    let copq;
     if (newstatus === "rejected") {
-      const breakes = await breaktasks.findAll({
-        where: {
-          task_id: taskId,
-        },
-      });
+      const breakes = await breaktasks.sequelize.query(
+        "SELECT * FROM breaktasks WHERE task_id = :taskId AND task_iteration < 3",
+        {
+          replacements: { taskId: taskId },
+          type: breaktasks.sequelize.QueryTypes.SELECT,
+        }
+      );
 
       let totalHours = 0;
       let totalMinutes = 0;
@@ -200,11 +203,69 @@ exports.updateTask = async (req, res) => {
 
       console.log(totalTime);
 
-      await breaktasks.create({
-        task_id: taskId,
-        task_status: "rejected",
-        total_time: totalTime,
+      await breaktasks.update(
+        {
+          task_id: taskId,
+          task_status: "rejected",
+          total_time: totalTime,
+        },
+        {
+          where: {
+            task_iteration: 3,
+          },
+        }
+      );
+
+      const userhourRate = await User.findByPk(task.userId);
+
+      copq = totalHours * userhourRate.ratePerHour;
+    }
+    if (newstatus === "approved") {
+      const breakes = await breaktasks.sequelize.query(
+        "SELECT * FROM breaktasks WHERE task_id = :taskId AND task_iteration <= 3",
+        {
+          replacements: { taskId: taskId },
+          type: breaktasks.sequelize.QueryTypes.SELECT,
+        }
+      );
+
+      let totalHours = 0;
+      let totalMinutes = 0;
+
+      breakes.forEach((item) => {
+        const [, hours, minutes] = item.total_time.match(
+          /(\d+) hours, (\d+\.\d+) minutes/
+        );
+        totalHours += parseInt(hours, 10);
+        totalMinutes += parseFloat(minutes);
       });
+
+      // Adjust totalMinutes if it exceeds 59
+      totalHours += Math.floor(totalMinutes / 60);
+      totalMinutes %= 60;
+
+      const totalTime = `${totalHours} hours, ${totalMinutes.toFixed(
+        2
+      )} minutes`;
+
+      console.log(totalTime);
+
+      await breaktasks.update(
+        {
+          task_id: taskId,
+          task_status: "approved",
+          total_time: totalTime,
+        },
+        {
+          where: {
+            task_iteration: 0,
+          },
+        }
+      );
+
+      const userhourRate = await User.findByPk(task.userId);
+
+      copq = totalHours * userhourRate.ratePerHour;
     }
 
     const jobIdInt = parseInt(jobId);
@@ -327,6 +388,7 @@ exports.updateTask = async (req, res) => {
         welder,
         painter,
         foreman,
+        COPQ: copq,
         task_iteration: task_alt,
       },
       { transaction }

@@ -201,6 +201,7 @@ const getBill = async (req, res) => {
             terms: rest.terms,
             shipVia: rest.shipVia,
             CompanyName: rest.Company.name,
+            CompanyAddress: rest.Company.address,
           };
         }
         groupedData[billTitle].items.push({
@@ -225,6 +226,7 @@ const getBill = async (req, res) => {
         terms: group.terms,
         shipVia: group.shipVia,
         CompanyName: group.CompanyName,
+        CompanyAddress: group.CompanyAddress,
         BillofLadingItems: group.items,
       }));
 

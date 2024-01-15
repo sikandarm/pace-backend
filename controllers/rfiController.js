@@ -20,6 +20,15 @@ const sendmail = async (req, res) => {
       suggestions,
     } = req.body.formData;
 
+    const dates = new Date(date);
+
+    // Format the date to "MMM DD, YYYY"
+    const formattedDate = dates.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+
     const htmlContent = generateHtmlFromFormData(
       requestedof,
       attn,
@@ -27,7 +36,7 @@ const sendmail = async (req, res) => {
       reference,
       RFI_N,
       OF,
-      date,
+      formattedDate,
       cc,
       information,
       suggestions

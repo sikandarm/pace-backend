@@ -134,6 +134,7 @@ const setbreaktask = async (req, res) => {
           const time1 = new Date(breakTask.break_start).getTime();
           const time2 = new Date(breakTask.break_end).getTime();
           const totaltime = time2 - time1;
+          console.log(totaltime);
           const time = formatTime(totaltime);
           await breakTask.update({
             total_time: time,
