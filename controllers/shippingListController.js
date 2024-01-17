@@ -189,11 +189,15 @@ const getBill = async (req, res) => {
       data.forEach((item) => {
         const { id, billTitle, ...rest } = item.get();
         const poNumber = item.bill_of_landing_item.PurchaseOrder.po_number;
+        const fax = item.bill_of_landing_item.PurchaseOrder.fax;
+        const Phone = item.bill_of_landing_item.PurchaseOrder.phone;
         if (!groupedData[billTitle]) {
           groupedData[billTitle] = {
             id,
             billTitle,
-            poNumber, // Include poNumber in the groupedData
+            poNumber,
+            fax,
+            Phone,
             items: [],
             address: rest.address,
             dilveryDate: rest.dilveryDate,
@@ -209,9 +213,8 @@ const getBill = async (req, res) => {
           FabricatedItems:
             item.bill_of_landing_item.fabricated_items_perjob.name,
 
-          Fax: item.bill_of_landing_item.PurchaseOrder.fax,
-          Phone: item.bill_of_landing_item.PurchaseOrder.phone,
-          // Add other fields as needed
+          // Fax: item.bill_of_landing_item.PurchaseOrder.fax,
+          // Phone: item.bill_of_landing_item.PurchaseOrder.phone,
         });
       });
 
@@ -220,6 +223,8 @@ const getBill = async (req, res) => {
         id: group.id,
         billTitle: group.billTitle,
         poNumber: group.poNumber,
+        fax: group.fax,
+        phone: group.Phone,
         address: group.address,
         dilveryDate: group.dilveryDate,
         orderDate: group.orderDate,

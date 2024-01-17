@@ -77,7 +77,7 @@ exports.createCAReort = async (req, res) => {
 
     await transaction.commit();
     if (caReport) {
-      const targetRoles = ["Admin"];
+      const targetRoles = ["Quality Manager"];
 
       const usersWithTargetRoles = await User.findAll({
         include: {
@@ -281,8 +281,11 @@ exports.createSharedReport = async (req, res) => {
   const { userId, reportId } = req.body;
 
   try {
+    // Split the comma-separated string of user IDs into an array
+    const userIdsArray = userId.split(",").map((id) => parseInt(id.trim(), 10));
+
     const users = await User.findAll({
-      where: { id: userId },
+      where: { id: userIdsArray },
     });
 
     if (users.length === 0) {
@@ -303,6 +306,8 @@ exports.createSharedReport = async (req, res) => {
     const createdSharedReports = await SharedReport.bulkCreate(sharedReports, {
       transaction,
     });
+
+    await transaction.commit();
     if (createdSharedReports) {
       for (const sharedReport of createdSharedReports) {
         const userTokens = await DeviceToken.findAll({
@@ -330,13 +335,10 @@ exports.createSharedReport = async (req, res) => {
             userId: sharedReport.userId,
           };
 
-          await Notification.create(notification, { transaction });
+          await Notification.create(notification);
         }
       }
     }
-
-    await transaction.commit();
-
     return successResponse(
       res,
       200,

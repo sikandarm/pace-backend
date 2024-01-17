@@ -73,6 +73,7 @@ const createsequencete = async (req, res) => {
         },
       });
       const createsequence = {
+        id: response.id,
         sequence_name: response.sequence_name,
         Job: response.Job ? response.Job.name : null,
         message: "Sequence created successfully!",
