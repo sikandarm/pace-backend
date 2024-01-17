@@ -1,9 +1,9 @@
-const { User, sequelize, Role, Permission } = require("../models");
+const { User, sequelize, Role, Permission, DeviceToken } = require("../models");
 const bcrypt = require("bcrypt");
 const { errorResponse, successResponse } = require("../utils/apiResponse");
 const QueryHelper = require("../utils/queryHelper");
 const nodemailer = require("nodemailer");
-
+const jwt = require("jsonwebtoken");
 const filterSortPaginate = require("../utils/queryUtil");
 
 exports.createUser = async (req, res) => {
@@ -283,15 +283,14 @@ exports.forgetPassword = async (req, res) => {
   await user.save();
 
   const transporter = nodemailer.createTransport({
-    service: process.env.SMTP_SERVICE,
+    service: process.env.SMTP_SERVICE || "gmail",
     auth: {
-      user: process.env.SMTP_MAIL,
-      pass: process.env.SMTP_PASS,
+      user: process.env.SMTP_MAIL || "pacep8633@gmail.com",
+      pass: process.env.SMTP_PASS || "zexyoyycvhpdnhea",
     },
   });
-
   const mailOptions = {
-    from: process.env.SMTP_MAIL,
+    from: process.env.SMTP_MAIL || "pacep8633@gmail.com",
     to: email,
     subject: "Password Reset",
     text: `Your OTP for password reset: ${resetToken}`,
@@ -319,7 +318,7 @@ exports.verifyOTP = async (req, res) => {
   }
 
   user.resetToken = null;
-  return res.status(200).json({ success: true });
+  return res.status(200).json({ success: true, message: "OTP Verified" });
 };
 
 exports.resetPassword = async (req, res) => {

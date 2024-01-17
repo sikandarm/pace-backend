@@ -13,6 +13,9 @@ module.exports = (sequelize, DataTypes) => {
       fabricated_items_perjob.belongsTo(models.Purchase_Order_Items, {
         foreignKey: "poitems_id",
       });
+      fabricated_items_perjob.hasMany(models.bill_of_landing_items, {
+        foreignKey: "fabricated_items",
+      });
     }
   }
   fabricated_items_perjob.init(

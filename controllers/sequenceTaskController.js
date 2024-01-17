@@ -224,6 +224,7 @@ const getsequencebyid = async (req, res) => {
     const sequencetask = await sequence_task.findAll({
       where: {
         sequence_id: id,
+        deletedAt: null,
       },
       include: [
         {

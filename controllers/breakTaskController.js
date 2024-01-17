@@ -1,6 +1,15 @@
 const { errorResponse, successResponse } = require("../utils/apiResponse");
-const { breaktasks, Task, sequelize } = require("../models");
-
+const {
+  breaktasks,
+  Task,
+  sequelize,
+  DeviceToken,
+  Role,
+  Notification,
+  User,
+} = require("../models");
+const sendPushNotification = require("../utils/sendPushNotification");
+const { formatTime } = require("../utils/timeConverter");
 const setbreaktask = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
@@ -17,12 +26,15 @@ const setbreaktask = async (req, res) => {
         return successResponse(res, 200, data, "Break Already Start");
       }
 
+      const task = await Task.findByPk(taskid);
+
       const setstartdate = await breaktasks.create(
         {
           task_id: taskid,
           break_start: break_start,
           break_end: null,
           comment: comment,
+          task_status: task.status,
           createdBy: req.user.id,
         },
         { transaction }
@@ -36,6 +48,58 @@ const setbreaktask = async (req, res) => {
         comment: setstartdate.comment,
       };
       if (setstartdate) {
+        const usersWithTargetRoles = await User.findAll({
+          include: {
+            model: Role,
+            attributes: ["name"],
+            as: "roles",
+            where: {
+              name: "Shop Foreman",
+            },
+          },
+        });
+        const taskdata = await Task.findAll({
+          where: {
+            id: taskid,
+          },
+        });
+        // Use a Set to collect unique user IDs
+        const targetUserIdsSet = new Set();
+        usersWithTargetRoles.forEach((user) => {
+          targetUserIdsSet.add(user.id);
+        });
+
+        const targetUserIds = Array.from(targetUserIdsSet);
+
+        const managerTokens = await DeviceToken.findAll({
+          where: { userId: targetUserIds },
+        });
+
+        // Filter out empty or invalid tokens from the array
+        const validManagerTokens = managerTokens
+          .map((token) => token.token)
+          .filter((token) => typeof token === "string" && token.trim() !== "");
+
+        if (validManagerTokens.length > 0) {
+          const registrationTokens = validManagerTokens;
+          const payload = {
+            notification: {
+              title: "Task Start",
+              body: `pmkNumber# ${taskdata[0]?.pmkNumber} Task Started`,
+            },
+          };
+
+          // await pushNotificationQueue.add({ registrationTokens, payload });
+          await sendPushNotification(registrationTokens, payload);
+
+          const notifications = targetUserIds.map((userId) => ({
+            title: payload.notification.title,
+            body: payload.notification.body,
+            userId,
+          }));
+          await Notification.bulkCreate(notifications);
+        }
+
         return successResponse(res, 200, modifiedres, "Break Start");
       }
     }
@@ -59,6 +123,24 @@ const setbreaktask = async (req, res) => {
         task_id: taskid,
         break_end: break_end,
       });
+      if (setenddate) {
+        const prvData2 = await breaktasks.findAll({
+          where: {
+            task_id: taskid,
+          },
+        });
+
+        for (const breakTask of prvData2) {
+          const time1 = new Date(breakTask.break_start).getTime();
+          const time2 = new Date(breakTask.break_end).getTime();
+          const totaltime = time2 - time1;
+          // console.log(totaltime);
+          const time = formatTime(totaltime);
+          await breakTask.update({
+            total_time: time,
+          });
+        }
+      }
       const modifiedres = {
         id: setenddate.id,
         task_id: setenddate.task_id,

@@ -30,6 +30,26 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      task_iteration: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 0,
+      },
+      task_status: {
+        type: DataTypes.ENUM(
+          "in_process",
+          "pending",
+          "rejected",
+          "approved",
+          "to_inspect"
+        ),
+        allowNull: false,
+        defaultValue: "pending",
+      },
+      total_time: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false,

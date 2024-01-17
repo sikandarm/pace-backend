@@ -6,12 +6,19 @@ const {
   sequence_task,
   sequence,
   sequelize,
+  DeviceToken,
+  Role,
+  Notification,
+  breaktasks,
 } = require("../models");
 const { Op } = require("sequelize");
 const { errorResponse, successResponse } = require("../utils/apiResponse");
 const filterSortPaginate = require("../utils/queryUtil");
 const { uploadFile, rollbackUploads } = require("../utils/fileUpload");
 const parseDate = require("../utils/parseDate");
+const sendPushNotification = require("../utils/sendPushNotification");
+const { previousDay } = require("date-fns");
+const { formatTime } = require("../utils/timeConverter");
 
 exports.createTask = async (req, res) => {
   const transaction = await sequelize.transaction();
@@ -113,6 +120,7 @@ exports.updateTask = async (req, res) => {
   try {
     const taskId = req.params.id;
     let task = await Task.findByPk(taskId);
+    const previousAlt = task.task_iteration;
 
     if (!task) {
       return errorResponse(res, 404, `Task with id ${taskId} not found`);
@@ -138,6 +146,175 @@ exports.updateTask = async (req, res) => {
       painter,
       foreman,
     } = req.body;
+
+    let newstatus = status;
+    let task_alt;
+
+    if (newstatus === "rejected" && previousAlt <= 2) {
+      if (previousAlt < 2) {
+        newstatus = "pending";
+      }
+      task_alt = previousAlt + 1;
+      try {
+        const breaktaskes = await breaktasks.findAll({
+          where: {
+            task_id: taskId,
+            task_iteration: 0,
+          },
+        });
+        for (let index = 0; index < breaktaskes.length; index++) {
+          const data = await breaktaskes[index].update({
+            task_iteration: task_alt,
+            task_status: "rejected",
+          });
+        }
+      } catch (error) {
+        console.error("Error updating breaktaskes:");
+      }
+    }
+    let totalCOPQ = 0;
+    // if (newstatus === "rejected") {
+    //   const breakes = await breaktasks.sequelize.query(
+    //     "SELECT * FROM breaktasks WHERE task_id = :taskId AND task_iteration < 3",
+    //     {
+    //       replacements: { taskId: taskId },
+    //       type: breaktasks.sequelize.QueryTypes.SELECT,
+    //     }
+    //   );
+
+    //   let totalHours = 0;
+    //   let totalMinutes = 0;
+
+    //   breakes.forEach((item) => {
+    //     const [, hours, minutes] = item.total_time.match(
+    //       /(\d+) hours, (\d+\.\d+) minutes/
+    //     );
+    //     totalHours += parseInt(hours, 10);
+    //     totalMinutes += parseFloat(minutes);
+    //   });
+
+    //   // Adjust totalMinutes if it exceeds 59
+    //   totalHours += Math.floor(totalMinutes / 60);
+    //   totalMinutes %= 60;
+
+    //   const totalTime = `${totalHours} hours, ${totalMinutes.toFixed(
+    //     2
+    //   )} minutes`;
+
+    //   console.log(totalTime);
+
+    //   await breaktasks.update(
+    //     {
+    //       task_id: taskId,
+    //       task_status: "rejected",
+    //       total_time: totalTime,
+    //     },
+    //     {
+    //       where: {
+    //         task_iteration: 3,
+    //       },
+    //     }
+    //   );
+
+    //   const userhourRate = await User.findByPk(task.userId);
+
+    //   copq = totalHours * userhourRate.ratePerHour;
+    // }
+    if (newstatus === "rejected") {
+      const breakes = await breaktasks.sequelize.query(
+        "SELECT * FROM breaktasks WHERE task_id = :taskId AND task_iteration <= 3",
+        {
+          replacements: { taskId: taskId },
+          type: breaktasks.sequelize.QueryTypes.SELECT,
+        }
+      );
+
+      // let totalCOPQ = 0;
+
+      for (const item of breakes) {
+        const [, hours, minutes] = item.total_time.match(
+          /(\d+) hours, (\d+\.\d+) minutes/
+        );
+
+        const totalHours =
+          parseInt(hours, 10) + Math.floor(parseFloat(minutes) / 60);
+        const totalMinutes = parseFloat(minutes) % 60;
+
+        const totalTime = `${totalHours} hours, ${totalMinutes.toFixed(
+          2
+        )} minutes`;
+
+        // Update breaktasks for task_iteration = 3
+        // await breaktasks.update(
+        //   {
+        //     task_id: taskId,
+        //     task_status: "rejected",
+        //     total_time: totalTime,
+        //   },
+        //   {
+        //     where: {
+        //       task_iteration: 3,
+        //     },
+        //   }
+        // );
+
+        const user = await User.findByPk(item.createdBy);
+
+        if (user) {
+          const userCOPQ = totalHours * user.ratePerHour;
+          totalCOPQ += userCOPQ;
+        }
+      }
+
+      // console.log("Total COPQ:", totalCOPQ);
+    }
+
+    if (newstatus === "approved") {
+      const breakes = await breaktasks.sequelize.query(
+        "SELECT * FROM breaktasks WHERE task_id = :taskId AND task_iteration < 3",
+        {
+          replacements: { taskId: taskId },
+          type: breaktasks.sequelize.QueryTypes.SELECT,
+        }
+      );
+
+      for (const item of breakes) {
+        const [, hours, minutes] = item.total_time.match(
+          /(\d+) hours, (\d+\.\d+) minutes/
+        );
+
+        const totalHours =
+          parseInt(hours, 10) + Math.floor(parseFloat(minutes) / 60);
+        const totalMinutes = parseFloat(minutes) % 60;
+
+        const totalTime = `${totalHours} hours, ${totalMinutes.toFixed(
+          2
+        )} minutes`;
+
+        // Update breaktasks for task_iteration = 3
+        // await breaktasks.update(
+        //   {
+        //     task_id: taskId,
+        //     task_status: "approved",
+        //     total_time: totalTime,
+        //   },
+        //   {
+        //     where: {
+        //       task_iteration: 0,
+        //     },
+        //   }
+        // );
+
+        const user = await User.findByPk(item.createdBy);
+
+        if (user) {
+          const userCOPQ = totalHours * user.ratePerHour;
+          totalCOPQ += userCOPQ;
+        }
+      }
+
+      // console.log("Total COPQ:", totalCOPQ);
+    }
 
     const jobIdInt = parseInt(jobId);
     const job = await Job.findByPk(jobIdInt);
@@ -169,7 +346,63 @@ exports.updateTask = async (req, res) => {
     }
     if (completedAt) {
       completedAt = parseDate(completedAt);
+
+      const targetRoles = ["Quality Control Inspector", "Project Manager"];
+
+      const usersWithTargetRoles = await User.findAll({
+        include: {
+          model: Role,
+          attributes: ["name"],
+          as: "roles",
+          where: {
+            name: targetRoles, // Use an array to match multiple roles
+          },
+        },
+      });
+
+      // Use a Set to collect unique user IDs
+      const targetUserIdsSet = new Set();
+      usersWithTargetRoles.forEach((user) => {
+        targetUserIdsSet.add(user.id);
+      });
+
+      const targetUserIds = Array.from(targetUserIdsSet);
+
+      const managerTokens = await DeviceToken.findAll({
+        where: { userId: targetUserIds },
+      });
+
+      const taskdata = await Task.findAll({
+        where: {
+          id: taskId,
+        },
+      });
+      // Filter out empty or invalid tokens from the array
+      const validManagerTokens = managerTokens
+        .map((token) => token.token)
+        .filter((token) => typeof token === "string" && token.trim() !== "");
+
+      if (validManagerTokens.length > 0) {
+        const registrationTokens = validManagerTokens;
+        const payload = {
+          notification: {
+            title: "Task Completed",
+            body: `pmkNumber# ${taskdata[0]?.pmkNumber} Task Has been Completed`,
+          },
+        };
+
+        // await pushNotificationQueue.add({ registrationTokens, payload });
+        await sendPushNotification(registrationTokens, payload);
+
+        const notifications = targetUserIds.map((userId) => ({
+          title: payload.notification.title,
+          body: payload.notification.body,
+          userId,
+        }));
+        await Notification.bulkCreate(notifications);
+      }
     }
+
     if (approvedAt) {
       approvedAt = parseDate(approvedAt);
     }
@@ -196,18 +429,21 @@ exports.updateTask = async (req, res) => {
         comments,
         image,
         rejectionReason,
-        status,
+        status: newstatus,
         projectManager,
         QCI,
         fitter,
         welder,
         painter,
         foreman,
+        COPQ: totalCOPQ,
+        task_iteration: task_alt,
       },
       { transaction }
     );
 
     await transaction.commit();
+
     return successResponse(res, 200, { task }, "Task updated successfully!");
   } catch (err) {
     await transaction.rollback();

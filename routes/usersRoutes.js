@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const {
   createUser,
   updateUser,
@@ -39,7 +39,5 @@ router
   .get(validate(paramValidationRules), getUser)
   .put(validate(userValidationRules), updateUser)
   .delete(validate(paramValidationRules), deleteUser);
-
-
 
 module.exports = router;

@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       SharedReport,
       Task,
       Notification,
-      PurchaseOrder
+      PurchaseOrder,
     }) {
       // define association here
       this.belongsToMany(Role, {
@@ -93,6 +93,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       resetTokenExpiry: {
         type: DataTypes.DATE,
+        allowNull: true,
+      },
+      Uid: {
+        type: DataTypes.STRING,
         allowNull: true,
       },
     },
