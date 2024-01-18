@@ -32,6 +32,8 @@ module.exports = {
           const rolePermissionsData = {
             roleId: receiverRole[0].id,
             permissionId: permissionId,
+            createdAt: new Date(),
+            updatedAt: new Date(),
           };
 
           await queryInterface.bulkInsert("rolepermissions", [

@@ -237,8 +237,20 @@ exports.generateHtmlFromFormData = (
 };
 
 // Helper function to generate PDF from HTML content using Puppeteer
+// exports.generatePdfFromHtml = async (htmlContent) => {
+//   const browser = await puppeteer.launch();
+//   const page = await browser.newPage();
+//   await page.setContent(htmlContent);
+//   const pdfBuffer = await page.pdf({ format: "A4" });
+//   await browser.close();
+//   return pdfBuffer;
+// };
+
 exports.generatePdfFromHtml = async (htmlContent) => {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox"],
+    executablePath: "/usr/bin/chromium-browser",
+  });
   const page = await browser.newPage();
   await page.setContent(htmlContent);
   const pdfBuffer = await page.pdf({ format: "A4" });

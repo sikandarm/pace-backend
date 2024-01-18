@@ -5,7 +5,7 @@ const { Contact } = require("../models");
 
 exports.sendEmail = async (pdfBuffer) => {
   const transporter = nodemailer.createTransport({
-    service: process.env.SMTP_SERVICE,
+    service: process.env.SMTP_SERVICE || "gmail",
     auth: {
       user: process.env.SMTP_MAIL || "pacep8633@gmail.com",
       pass: process.env.SMTP_PASS || "zexyoyycvhpdnhea",
