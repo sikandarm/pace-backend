@@ -144,7 +144,6 @@ const getallSequences = async (req, res) => {
       Job: item.Job.name,
       jobid: item.Job.id,
     }));
-
     if (Itemsdata.length > 0) {
       return successResponse(res, 200, { sequence: Itemsdata }, "Sequences");
     } else {

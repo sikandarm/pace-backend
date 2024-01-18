@@ -23,6 +23,8 @@ module.exports = {
     const rolePermissionsData = permissionIds.map((permission) => ({
       roleId: adminRole,
       permissionId: permission.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     }));
 
     await queryInterface.bulkInsert("rolepermissions", rolePermissionsData, {});

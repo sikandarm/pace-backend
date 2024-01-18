@@ -15,6 +15,7 @@ module.exports = {
           email: "admin@pace.com",
           password: hashedPassword,
           isActive: 1,
+          createdAt: new Date(),
         },
       ],
       {}

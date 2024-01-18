@@ -28,6 +28,8 @@ module.exports = {
         {
           userId: adminUser,
           roleId: adminRole,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       ],
       {}
