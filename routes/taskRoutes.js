@@ -9,6 +9,7 @@ const {
   approvedTask,
   rejectedTask,
   getRejectedTaskByMonthAndYear,
+  taskAssigntoUser,
 } = require("../controllers/taskController");
 
 const validate = require("../middlewares/validate");
@@ -41,5 +42,9 @@ router
 router.route("/:id/approved").patch(approvedTask);
 
 router.route("/:id/rejected").patch(rejectedTask);
+
+router
+  .route("/assign_task/:id")
+  .patch(validate(paramValidationRules), taskAssigntoUser);
 
 module.exports = router;

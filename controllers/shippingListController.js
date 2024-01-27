@@ -147,7 +147,7 @@ const getBill = async (req, res) => {
       include: [
         {
           model: bill_of_landing_items,
-          attributes: ["quantity"],
+          attributes: ["id", "quantity"],
           include: [
             {
               model: PurchaseOrder,
@@ -173,13 +173,14 @@ const getBill = async (req, res) => {
         "id",
         "billTitle",
         "address",
-        "dilveryDate",
+        "deliveryDate",
         "orderDate",
         "terms",
-        "company_id",
         "shipVia",
-        "createdAt",
-        "updatedAt",
+        "receivedDate",
+        "receivedStatus",
+        "receivedBy",
+        "companyId",
       ],
     });
 
@@ -188,19 +189,20 @@ const getBill = async (req, res) => {
       const groupedData = {};
       data.forEach((item) => {
         const { id, billTitle, ...rest } = item.get();
-        const poNumber = item.bill_of_landing_item.PurchaseOrder.po_number;
-        const fax = item.bill_of_landing_item.PurchaseOrder.fax;
-        const Phone = item.bill_of_landing_item.PurchaseOrder.phone;
+        const poNumber = item.bill_of_landing_items[0]?.PurchaseOrder.po_number;
+        const fax = item.bill_of_landing_items[0]?.PurchaseOrder.fax;
+        const phone = item.bill_of_landing_items[0]?.PurchaseOrder.phone;
         if (!groupedData[billTitle]) {
           groupedData[billTitle] = {
             id,
             billTitle,
             poNumber,
             fax,
-            Phone,
-            items: [],
+            phone,
+            items: [], // Initialize items array
             address: rest.address,
-            dilveryDate: rest.dilveryDate,
+            receivedStatus: rest.receivedStatus,
+            deliveryDate: rest.deliveryDate,
             orderDate: rest.orderDate,
             terms: rest.terms,
             shipVia: rest.shipVia,
@@ -208,13 +210,13 @@ const getBill = async (req, res) => {
             CompanyAddress: rest.Company.address,
           };
         }
-        groupedData[billTitle].items.push({
-          Quantity: item.bill_of_landing_item.quantity,
-          FabricatedItems:
-            item.bill_of_landing_item.fabricated_items_perjob.name,
-
-          // Fax: item.bill_of_landing_item.PurchaseOrder.fax,
-          // Phone: item.bill_of_landing_item.PurchaseOrder.phone,
+        // Iterate over all bill items and push them to the items array
+        item.bill_of_landing_items.forEach((billItem) => {
+          groupedData[billTitle].items.push({
+            id: billItem.id,
+            Quantity: billItem.quantity,
+            FabricatedItems: billItem.fabricated_items_perjob.name,
+          });
         });
       });
 
@@ -224,9 +226,10 @@ const getBill = async (req, res) => {
         billTitle: group.billTitle,
         poNumber: group.poNumber,
         fax: group.fax,
-        phone: group.Phone,
+        phone: group.phone,
         address: group.address,
-        dilveryDate: group.dilveryDate,
+        deliveryDate: group.deliveryDate,
+        receivedStatus: group.receivedStatus,
         orderDate: group.orderDate,
         terms: group.terms,
         shipVia: group.shipVia,
@@ -321,8 +324,8 @@ const createBill = async (req, res) => {
     const existingBillItems = await bill_of_landing_items.findAll({
       where: {
         [Op.or]: bill_of_landing_item.map((item) => ({
-          fabricated_items: item.fabricatedItemId,
-          purchase_order: item.purchaseOrderId,
+          fabricateditemsId: item.fabricatedItemId,
+          purchaseorderId: item.purchaseOrderId,
         })),
       },
     });
@@ -340,22 +343,23 @@ const createBill = async (req, res) => {
     let bill;
     await Promise.all(
       bill_of_landing_item.map(async (item) => {
-        const billItem = await bill_of_landing_items.create({
-          fabricated_items: item.fabricatedItemId,
-          purchase_order: item.purchaseOrderId,
-          quantity: item.quantity,
-        });
-        // console.log(billItem.id);
         bill = await bill_of_lading.create({
           billTitle: billTitle,
           address: address,
-          dilveryDate: dilveryDate,
+          deliveryDate: dilveryDate,
           orderDate: orderDate,
           terms: terms,
           shipVia: shipVia,
-          company_id: company_id,
-          bill_lading_items: billItem.id,
+          companyId: company_id,
+          // bill_lading_items: billItem.id,
         });
+        const billItem = await bill_of_landing_items.create({
+          fabricateditemsId: item.fabricatedItemId,
+          purchaseorderId: item.purchaseOrderId,
+          quantity: item.quantity,
+          billId: bill.id,
+        });
+        // console.log(billItem.id);
       })
     );
     if (bill) {
@@ -408,9 +412,58 @@ const createBill = async (req, res) => {
   }
 };
 
+const updateBillItems = async (req, res) => {
+  try {
+    const { item, billId } = req.body;
+    item.map((item) => {
+      if (!item.id) {
+        return errorResponse(res, 400, "Item Id Required");
+      }
+      if (!item.quantity) {
+        return errorResponse(res, 400, "Item Quantity Required");
+      }
+    });
+
+    if (!item) {
+      return errorResponse(res, 400, "Invalid input data!");
+    }
+    const updatePromises = item.map((item, index) => {
+      bill_of_landing_items.update(
+        {
+          receivedQuantity: item.quantity,
+        },
+        {
+          where: { id: item.id },
+        }
+      );
+      bill_of_lading.update(
+        {
+          receivedBy: req.user.id,
+          receivedDate: Date.now(),
+          receivedStatus: "Received",
+        },
+        {
+          where: { id: billId },
+        }
+      );
+    });
+
+    const updatedItems = await Promise.all(updatePromises);
+
+    if (updatedItems) {
+      return successResponse(res, 200, {}, "Items updated successfully!");
+    } else {
+      return errorResponse(res, 404, "No items found or updated!");
+    }
+  } catch (error) {
+    return errorResponse(res, 500, "Error updating items!", error);
+  }
+};
+
 module.exports = {
   // createBillItems,
   getBill,
   deleteBill,
   createBill,
+  updateBillItems,
 };

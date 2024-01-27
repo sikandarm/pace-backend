@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "poitems_id",
       });
       fabricated_items_perjob.hasMany(models.bill_of_landing_items, {
-        foreignKey: "fabricated_items",
+        foreignKey: "fabricateditemsId",
       });
     }
   }

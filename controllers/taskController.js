@@ -801,3 +801,29 @@ exports.getRejectedTaskByMonthAndYear = async (req, res) => {
     return errorResponse(res, 400, "Something went wrong!", err);
   }
 };
+
+exports.taskAssigntoUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return successResponse(res, 200, "Task Id Required");
+    }
+    const taskfind = await Task.findByPk(id);
+    const assigntask = taskfind.update({
+      userId: req.user.id,
+    });
+
+    if (assigntask) {
+      return successResponse(
+        res,
+        200,
+        { assigntask },
+        "Task Assign Successfully!"
+      );
+    } else {
+      return successResponse(res, 200, "Task Not Assign!");
+    }
+  } catch (error) {
+    return errorResponse(res, 400, "Something went wrong!", error);
+  }
+};

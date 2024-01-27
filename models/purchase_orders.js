@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       PurchaseOrder.hasMany(models.Job, { foreignKey: "po_id" });
       PurchaseOrder.hasMany(models.bill_of_landing_items, {
-        foreignKey: "purchase_order",
+        foreignKey: "purchaseorderId",
       });
     }
   }

@@ -119,10 +119,14 @@ const setbreaktask = async (req, res) => {
           "Not End Break First Start Break"
         );
       }
-      const setenddate = await prvData.update({
+      let dataUpdate = {
         task_id: taskid,
         break_end: break_end,
-      });
+      };
+      if (comment != null) {
+        dataUpdate.comment = comment;
+      }
+      const setenddate = await prvData.update(dataUpdate);
       if (setenddate) {
         const prvData2 = await breaktasks.findAll({
           where: {
@@ -170,9 +174,9 @@ const breakstatus = async (req, res) => {
     //   return successResponse(res, 200, "Not Break Found");
     // }
     if (status[0]?.break_start) {
-      return successResponse(res, 200, true);
-    } else {
       return successResponse(res, 200, false);
+    } else {
+      return successResponse(res, 200, true);
     }
   } catch (error) {
     return errorResponse(res, 400, "Something went wrong!", error);
@@ -194,6 +198,7 @@ const breaktasklogs = async (req, res) => {
       break_start: items.break_start,
       break_end: items.break_end,
       comment: items.comment,
+      iteration: items.task_iteration,
     }));
 
     if (logs) {

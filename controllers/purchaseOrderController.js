@@ -386,7 +386,7 @@ const getPurchaseOrderByLoginUser = async (req, res) => {
     deleted_at: null,
   };
 
-  if (user.roles[0] === "Admin") {
+  if (user.roles[0] === "Receiver" || user.roles[0] === "Admin") {
     try {
       const purchaseOrders = await PurchaseOrder.findAll({
         where: whereClause,

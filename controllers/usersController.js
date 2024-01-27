@@ -236,6 +236,9 @@ exports.userSignup = async (req, res) => {
       req.body;
 
     const duplicate = await User.findOne({ where: { email } });
+    if (ratePerHour === "undefined") {
+      ratePerHour = null;
+    }
 
     if (duplicate) {
       return errorResponse(res, 409, "Email already exist");

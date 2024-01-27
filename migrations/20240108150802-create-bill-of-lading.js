@@ -13,11 +13,21 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      companyId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "companies",
+          key: "id",
+          onDelete: "CASCADE",
+          onUpdate: "CASCADE",
+        },
+      },
       address: {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      dilveryDate: {
+      deliveryDate: {
         type: Sequelize.DATE,
         allowNull: true,
       },
@@ -33,15 +43,17 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      bill_lading_items: {
+      receivedDate: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      receivedStatus: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      receivedBy: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "bill_of_landing_items",
-          key: "id",
-          onDelete: "CASCADE",
-          onUpdate: "CASCADE",
-        },
+        allowNull: true,
       },
       createdAt: {
         allowNull: false,

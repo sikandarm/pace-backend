@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "id",
       });
       Company.hasMany(models.bill_of_lading, {
-        foreignKey: "company_id",
+        foreignKey: "companyId",
       });
     }
   }

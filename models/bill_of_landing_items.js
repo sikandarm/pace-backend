@@ -9,27 +9,35 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       bill_of_landing_items.belongsTo(models.PurchaseOrder, {
-        foreignKey: "purchase_order",
+        foreignKey: "purchaseorderId",
       });
       bill_of_landing_items.belongsTo(models.fabricated_items_perjob, {
-        foreignKey: "fabricated_items",
+        foreignKey: "fabricateditemsId",
       });
-      bill_of_landing_items.hasMany(models.bill_of_lading, {
-        foreignKey: "bill_lading_items",
+      bill_of_landing_items.belongsTo(models.bill_of_lading, {
+        foreignKey: "billId",
       });
     }
   }
   bill_of_landing_items.init(
     {
-      fabricated_items: {
+      fabricateditemsId: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      purchase_order: {
+      purchaseorderId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      billId: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
       quantity: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      receivedQuantity: {
         type: DataTypes.INTEGER,
         allowNull: true,
       },

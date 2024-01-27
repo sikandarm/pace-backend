@@ -9,7 +9,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      fabricated_items: {
+      fabricateditemsId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -19,7 +19,7 @@ module.exports = {
           onUpdate: "CASCADE",
         },
       },
-      purchase_order: {
+      purchaseorderId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -29,7 +29,21 @@ module.exports = {
           onUpdate: "CASCADE",
         },
       },
+      billId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "bill_of_ladings",
+          key: "id",
+          onDelete: "CASCADE",
+          onUpdate: "CASCADE",
+        },
+      },
       quantity: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
+      receivedQuantity: {
         type: Sequelize.INTEGER,
         allowNull: true,
       },
