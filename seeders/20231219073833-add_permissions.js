@@ -12,7 +12,21 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        name: "View tasks",
+        name: "BIll of Lading",
+        slug: "bill_of_lading",
+        isActive: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        name: "Received Bill",
+        slug: "received_bill",
+        isActive: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        name: "View task",
         slug: "view_task",
         isActive: 1,
         createdAt: new Date(),

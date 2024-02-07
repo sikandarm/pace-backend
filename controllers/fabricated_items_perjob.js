@@ -69,7 +69,7 @@ const getfebricateditems = async (req, res) => {
 };
 
 const createfabricateditems = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const { name, job_Id, quantity, poitems_id } = req.body;
     const existingItem = await fabricated_items_perjob.findOne({
@@ -90,11 +90,12 @@ const createfabricateditems = async (req, res) => {
         quantity: quantity,
         job_Id: job_Id,
         poitems_id: poitems_id,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
     if (createitem) {
       return successResponse(res, 200, createitem, "Fabricated Item Created");
     } else {
@@ -106,7 +107,7 @@ const createfabricateditems = async (req, res) => {
 };
 
 const updatefabricateditems = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const items = req.params.id;
     const { name, quantity, job_Id, poitems_id } = req.body;
@@ -120,10 +121,11 @@ const updatefabricateditems = async (req, res) => {
         quantity: quantity,
         job_Id: job_Id,
         poitems_id: poitems_id,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
-    await transaction.commit();
+    // await transaction.commit();
     if (updateitem) {
       return successResponse(res, 200, updateitem, "Fabricated Item Update");
     } else {

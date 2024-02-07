@@ -3,7 +3,7 @@ const { Company, sequelize } = require("../models");
 
 // Create a new company
 exports.createCompany = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const { name, address, phone, fax, email } = req.body;
     const company = await Company.create(
@@ -14,11 +14,12 @@ exports.createCompany = async (req, res) => {
         fax,
         email,
         created_by: req.user.id,
-      },
-      { transaction } 
+      }
+      // ,
+      // { transaction }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
 
     return successResponse(
       res,
@@ -27,14 +28,14 @@ exports.createCompany = async (req, res) => {
       "Company created successfully"
     );
   } catch (err) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong", err);
   }
 };
 
 // Update a company
 exports.updateCompany = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
 
   try {
     const companyId = req.params.id;
@@ -52,9 +53,9 @@ exports.updateCompany = async (req, res) => {
     company.phone = phone;
     company.fax = fax;
     company.email = email;
-    (company.updated_by = req.user.id), await company.save({ transaction });
+    (company.updated_by = req.user.id), await company.save();
 
-    await transaction.commit();
+    // await transaction.commit();
 
     return successResponse(
       res,
@@ -64,7 +65,7 @@ exports.updateCompany = async (req, res) => {
     );
   } catch (err) {
     console.error(err);
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 500, "Something went wrong", err);
   }
 };
@@ -78,11 +79,10 @@ exports.getAllCompanies = async (req, res) => {
     let whereClause = {};
 
     if (name) {
-      whereClause = { name , deletedAt:null };  
-    }else{
-      whereClause = {deletedAt:null}
+      whereClause = { name, deletedAt: null };
+    } else {
+      whereClause = { deletedAt: null };
     }
-   
 
     const totalCount = await Company.count({ where: whereClause });
     const totalPages = Math.ceil(totalCount / pageSize);
@@ -106,13 +106,13 @@ exports.getAllCompanies = async (req, res) => {
         email: company.email,
         created_by: company.created_by,
         updated_by: company.updated_by,
-        deletedAt : company.deletedAt,
+        deletedAt: company.deletedAt,
       };
     });
     return successResponse(res, 200, {
       companies: modifiedCompanies,
       page: page,
-    },);
+    });
   } catch (err) {
     console.error(err);
     return errorResponse(res, 500, "Something went wrong", err);

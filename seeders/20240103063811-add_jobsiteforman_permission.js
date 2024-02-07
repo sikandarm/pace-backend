@@ -9,7 +9,13 @@ module.exports = {
     );
 
     if (receiverRole && receiverRole.length > 0) {
-      const roleArray = ["View notifications", "Edit Profile", "View profile"];
+      const roleArray = [
+        "View notifications",
+        "Edit Profile",
+        "View profile",
+        "BIll of Lading",
+        "Received Bill",
+      ];
 
       for (let i = 0; i < roleArray.length; i++) {
         const permissionIdResult = await queryInterface.sequelize.query(

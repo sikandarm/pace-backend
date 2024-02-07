@@ -15,10 +15,10 @@ const taskValidationRules = [
       req.body.jobId = parsedJobId;
       return true;
     }),
-  body("userId")
-    .optional({ nullable: true })
-    .isInt()
-    .withMessage("must be an integer."),
+  // body("userId")
+  //   .optional({ nullable: false })
+  //   .isInt()
+  //   .withMessage("must be an integer."),
   body("approvedBy")
     .optional({ nullable: true })
     .isInt()

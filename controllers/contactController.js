@@ -5,7 +5,7 @@ const { Contact, sequelize } = require("../models");
 const { errorResponse, successResponse } = require("../utils/apiResponse");
 
 exports.createContact = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const { firstName, lastName, email, phoneNumber } = req.body;
 
@@ -15,11 +15,12 @@ exports.createContact = async (req, res) => {
         lastName,
         email,
         phoneNumber,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
 
     return successResponse(
       res,
@@ -28,13 +29,13 @@ exports.createContact = async (req, res) => {
       "Contact created successfully"
     );
   } catch (err) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong", err);
   }
 };
 
 exports.updateContact = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
 
   try {
     const contactId = req.params.id;
@@ -56,9 +57,9 @@ exports.updateContact = async (req, res) => {
     contact.email = email;
     contact.phoneNumber = phoneNumber;
 
-    await contact.save({ transaction });
+    await contact.save();
 
-    await transaction.commit();
+    // await transaction.commit();
 
     return successResponse(
       res,
@@ -68,7 +69,7 @@ exports.updateContact = async (req, res) => {
     );
   } catch (err) {
     console.error(err);
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 500, "Something went wrong", err);
   }
 };
@@ -151,7 +152,12 @@ exports.deleteContact = async (req, res) => {
 
     const deletedContact = await contact.destroy();
     if (deletedContact) {
-      return successResponse(res, 200, deletedContact, "Contact deleted successfully");
+      return successResponse(
+        res,
+        200,
+        deletedContact,
+        "Contact deleted successfully"
+      );
     }
 
     return errorResponse(res, 400, "Failed to delete the contact");

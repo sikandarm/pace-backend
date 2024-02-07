@@ -19,7 +19,7 @@ const {
 } = require("../models");
 
 const createPurchaseOrder = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const {
       company_id,
@@ -55,7 +55,7 @@ const createPurchaseOrder = async (req, res) => {
         delivery_date,
         confirm_with,
         vendor_name: vendor_id,
-        userId: userId,
+        userId: userId || null,
         order_date,
         placed_via,
         po_number,
@@ -69,8 +69,9 @@ const createPurchaseOrder = async (req, res) => {
         fax,
         status,
         created_by: req.user.id,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
     if (purchaseOrder) {
@@ -134,7 +135,7 @@ const createPurchaseOrder = async (req, res) => {
         await Notification.bulkCreate(notifications);
       }
     }
-    await transaction.commit();
+    // await transaction.commit();
 
     return successResponse(
       res,
@@ -143,7 +144,7 @@ const createPurchaseOrder = async (req, res) => {
       "purchaseOrder created successfully"
     );
   } catch (error) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong", error.message);
   }
 };
@@ -151,7 +152,7 @@ const createPurchaseOrder = async (req, res) => {
 // update PurchaseOrder
 
 const updatePurchaseOrder = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const purchaseOrderId = req.params.id;
     const {
@@ -171,6 +172,7 @@ const updatePurchaseOrder = async (req, res) => {
       term,
       fax,
       status,
+      userId,
     } = req.body;
 
     const purchaseOrder = await PurchaseOrder.findByPk(purchaseOrderId);
@@ -196,9 +198,10 @@ const updatePurchaseOrder = async (req, res) => {
     purchaseOrder.fax = fax;
     purchaseOrder.status = status;
     purchaseOrder.updated_by = req.user.id;
+    purchaseOrder.userId = userId;
 
-    await purchaseOrder.save({ transaction });
-    await transaction.commit();
+    await purchaseOrder.save();
+    // await transaction.commit();
     return successResponse(
       res,
       200,
@@ -207,7 +210,7 @@ const updatePurchaseOrder = async (req, res) => {
     );
   } catch (err) {
     console.error(err);
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 500, "Something went wrong", err);
   }
 };
@@ -295,7 +298,7 @@ const getAllPurchaseOrders = async (req, res) => {
 const getPurchaseOrderById = async (req, res) => {
   try {
     const { id } = req.params;
-    //console.log(id)
+    console.log(id);
     if (id) {
       const purchaseOrdeById = await PurchaseOrder.findByPk(id, {
         include: [
@@ -466,7 +469,7 @@ const getPurchaseOrderByLoginUser = async (req, res) => {
 };
 
 const changeStatus = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -482,8 +485,8 @@ const changeStatus = async (req, res) => {
 
     if (modifiedstatus === "Received") {
       purchaseOrder.status = modifiedstatus;
-      await purchaseOrder.save({ transaction });
-      await transaction.commit();
+      await purchaseOrder.save();
+      // await transaction.commit();
 
       let createjob;
       if (purchaseOrder) {
@@ -506,7 +509,7 @@ const changeStatus = async (req, res) => {
     }
   } catch (err) {
     console.error(err);
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 500, "Something went wrong", err);
   }
 };

@@ -11,7 +11,7 @@ module.exports = {
     if (receiverRole && receiverRole.length > 0) {
       const roleArray = [
         "View jobs",
-        "View tasks",
+        "View task",
         "View inventory",
         "View profile",
         "Edit profile",

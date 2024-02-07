@@ -123,7 +123,7 @@ exports.getRole = async (req, res) => {
 };
 
 exports.updateRole = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const id = req.params.id;
 
@@ -184,19 +184,20 @@ exports.updateRole = async (req, res) => {
       {
         name,
         isNotification,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
     if (updatedRole) {
       if (permissions.length > 0) {
-        await updatedRole.setPermissions(permissions, { transaction });
+        await updatedRole.setPermissions(permissions);
       } else {
         // Remove all permissions associated with the role
-        await updatedRole.setPermissions([], { transaction });
+        await updatedRole.setPermissions([]);
       }
 
-      await transaction.commit();
+      // await transaction.commit();
 
       const updatedPermissions = await Permission.findAll({
         where: { id: permissions },
@@ -217,7 +218,7 @@ exports.updateRole = async (req, res) => {
       );
     }
 
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Update Failed!");
   } catch (err) {
     return errorResponse(res, 400, "Something went wrong", err);

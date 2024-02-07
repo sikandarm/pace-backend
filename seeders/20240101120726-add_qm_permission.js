@@ -27,7 +27,7 @@ module.exports = {
         "View inventory detail",
         "View inventory",
         "View dashboard with graphs",
-        "View tasks",
+        "View task",
         "View jobs",
       ];
 

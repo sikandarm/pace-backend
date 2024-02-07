@@ -19,10 +19,11 @@ module.exports = {
         "View Purchase Details",
         "View Task Detail",
         "View jobs",
-        "View tasks",
+        "View task",
         "View inventory",
         "View inventory detail",
         "Add inventory",
+        "BIll of Lading",
       ];
 
       for (let i = 0; i < roleArray.length; i++) {

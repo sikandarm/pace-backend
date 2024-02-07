@@ -8,7 +8,7 @@ const {
 //CreatePurchaseOrderItem
 
 const createPurchaseOrderItem = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const { po_id, quantity, inventory_id } = req.body;
 
@@ -19,7 +19,7 @@ const createPurchaseOrderItem = async (req, res) => {
     });
 
     if (!purchaseOrder) {
-      await transaction.rollback();
+      // await transaction.rollback();
       return errorResponse(res, 404, "PurchaseOrder not found");
     }
 
@@ -31,7 +31,7 @@ const createPurchaseOrderItem = async (req, res) => {
     });
 
     if (!inventory) {
-      await transaction.rollback();
+      // await transaction.rollback();
       return errorResponse(res, 404, "Inventory item not found");
     }
 
@@ -43,12 +43,12 @@ const createPurchaseOrderItem = async (req, res) => {
         created_by: req.user.id,
       },
       {
-        transaction,
+        // transaction,
         include: [PurchaseOrder, Inventory],
       }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
     return successResponse(
       res,
       201,
@@ -56,7 +56,7 @@ const createPurchaseOrderItem = async (req, res) => {
       "PurchaseOrder created successfully"
     );
   } catch (error) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong", error);
   }
 };
@@ -64,7 +64,7 @@ const createPurchaseOrderItem = async (req, res) => {
 
 const getAllPurchaseOrderItems = async (req, res) => {
   try {
-    const purchaseOrderItems = await Purchase_Order_Items.findAll( );
+    const purchaseOrderItems = await Purchase_Order_Items.findAll();
 
     return successResponse(
       res,

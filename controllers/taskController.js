@@ -21,7 +21,7 @@ const { previousDay } = require("date-fns");
 const { formatTime } = require("../utils/timeConverter");
 
 exports.createTask = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   let imageFilePath;
   try {
     let {
@@ -97,16 +97,17 @@ exports.createTask = async (req, res) => {
         welder,
         painter,
         foreman,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
 
     return successResponse(res, 201, { task }, "Task created successfully!");
   } catch (err) {
     console.log(err);
-    await transaction.rollback();
+    // await transaction.rollback();
 
     if (imageFilePath) {
       await rollbackUploads(imageFilePath, "task_images");
@@ -116,7 +117,7 @@ exports.createTask = async (req, res) => {
 };
 
 exports.updateTask = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const taskId = req.params.id;
     let task = await Task.findByPk(taskId);
@@ -167,59 +168,14 @@ exports.updateTask = async (req, res) => {
             task_iteration: task_alt,
             task_status: "rejected",
           });
+          console.log(data);
         }
       } catch (error) {
         console.error("Error updating breaktaskes:");
       }
     }
     let totalCOPQ = 0;
-    // if (newstatus === "rejected") {
-    //   const breakes = await breaktasks.sequelize.query(
-    //     "SELECT * FROM breaktasks WHERE task_id = :taskId AND task_iteration < 3",
-    //     {
-    //       replacements: { taskId: taskId },
-    //       type: breaktasks.sequelize.QueryTypes.SELECT,
-    //     }
-    //   );
 
-    //   let totalHours = 0;
-    //   let totalMinutes = 0;
-
-    //   breakes.forEach((item) => {
-    //     const [, hours, minutes] = item.total_time.match(
-    //       /(\d+) hours, (\d+\.\d+) minutes/
-    //     );
-    //     totalHours += parseInt(hours, 10);
-    //     totalMinutes += parseFloat(minutes);
-    //   });
-
-    //   // Adjust totalMinutes if it exceeds 59
-    //   totalHours += Math.floor(totalMinutes / 60);
-    //   totalMinutes %= 60;
-
-    //   const totalTime = `${totalHours} hours, ${totalMinutes.toFixed(
-    //     2
-    //   )} minutes`;
-
-    //   console.log(totalTime);
-
-    //   await breaktasks.update(
-    //     {
-    //       task_id: taskId,
-    //       task_status: "rejected",
-    //       total_time: totalTime,
-    //     },
-    //     {
-    //       where: {
-    //         task_iteration: 3,
-    //       },
-    //     }
-    //   );
-
-    //   const userhourRate = await User.findByPk(task.userId);
-
-    //   copq = totalHours * userhourRate.ratePerHour;
-    // }
     if (newstatus === "rejected") {
       const breakes = await breaktasks.sequelize.query(
         "SELECT * FROM breaktasks WHERE task_id = :taskId AND task_iteration <= 3",
@@ -240,28 +196,12 @@ exports.updateTask = async (req, res) => {
           parseInt(hours, 10) + Math.floor(parseFloat(minutes) / 60);
         const totalMinutes = parseFloat(minutes) % 60;
 
-        const totalTime = `${totalHours} hours, ${totalMinutes.toFixed(
-          2
-        )} minutes`;
-
-        // Update breaktasks for task_iteration = 3
-        // await breaktasks.update(
-        //   {
-        //     task_id: taskId,
-        //     task_status: "rejected",
-        //     total_time: totalTime,
-        //   },
-        //   {
-        //     where: {
-        //       task_iteration: 3,
-        //     },
-        //   }
-        // );
+        const totalTimeInHours = totalHours + totalMinutes / 60;
 
         const user = await User.findByPk(item.createdBy);
 
         if (user) {
-          const userCOPQ = totalHours * user.ratePerHour;
+          const userCOPQ = totalTimeInHours * user.ratePerHour;
           totalCOPQ += userCOPQ;
         }
       }
@@ -287,28 +227,12 @@ exports.updateTask = async (req, res) => {
           parseInt(hours, 10) + Math.floor(parseFloat(minutes) / 60);
         const totalMinutes = parseFloat(minutes) % 60;
 
-        const totalTime = `${totalHours} hours, ${totalMinutes.toFixed(
-          2
-        )} minutes`;
-
-        // Update breaktasks for task_iteration = 3
-        // await breaktasks.update(
-        //   {
-        //     task_id: taskId,
-        //     task_status: "approved",
-        //     total_time: totalTime,
-        //   },
-        //   {
-        //     where: {
-        //       task_iteration: 0,
-        //     },
-        //   }
-        // );
+        const totalTimeInHours = totalHours + totalMinutes / 60;
 
         const user = await User.findByPk(item.createdBy);
 
         if (user) {
-          const userCOPQ = totalHours * user.ratePerHour;
+          const userCOPQ = totalTimeInHours * user.ratePerHour;
           totalCOPQ += userCOPQ;
         }
       }
@@ -334,7 +258,7 @@ exports.updateTask = async (req, res) => {
       try {
         image = await uploadFile(req.files.image, "task_images");
       } catch (err) {
-        await transaction.rollback();
+        // await transaction.rollback();
         return errorResponse(res, 400, "Error uploading the image", err);
       }
     }
@@ -438,15 +362,16 @@ exports.updateTask = async (req, res) => {
         foreman,
         COPQ: totalCOPQ,
         task_iteration: task_alt,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
 
     return successResponse(res, 200, { task }, "Task updated successfully!");
   } catch (err) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong!", err);
   }
 };
@@ -593,7 +518,7 @@ exports.getTask = async (req, res) => {
 };
 
 exports.deleteTask = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
 
   try {
     const taskId = req.params.id;
@@ -607,12 +532,12 @@ exports.deleteTask = async (req, res) => {
       await rollbackUploads(task.image, "task_images");
     }
 
-    await Task.destroy({ where: { id: taskId } }, { transaction });
-    await transaction.commit();
+    await Task.destroy({ where: { id: taskId } });
+    // await transaction.commit();
 
     return successResponse(res, 200, null, "Task deleted successfully!");
   } catch (err) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong!", err);
   }
 };
@@ -647,7 +572,7 @@ exports.exportTask = async (req, res) => {
 };
 
 exports.approvedTask = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     let { approvedAt, status } = req.body;
     const taskId = req.params.id;
@@ -657,18 +582,18 @@ exports.approvedTask = async (req, res) => {
       return errorResponse(res, 404, `Task with id ${taskId} not found`);
     }
     approvedAt = parseDate(approvedAt);
-    await task.update({ status, approvedAt }, { transaction });
+    await task.update({ status, approvedAt });
 
-    await transaction.commit();
+    // await transaction.commit();
     return successResponse(res, 200, { task }, "Task approved successfully!");
   } catch (err) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong!", err);
   }
 };
 
 exports.rejectedTask = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const { status } = req.body;
     const taskId = req.params.id;
@@ -693,12 +618,12 @@ exports.rejectedTask = async (req, res) => {
     const formattedCOPQ = Number(totalCOPQInHours.toFixed(2));
     const cumulativeCOPQ = parseFloat(task.COPQ) + formattedCOPQ;
 
-    await task.update({ status, COPQ: cumulativeCOPQ }, { transaction });
+    await task.update({ status, COPQ: cumulativeCOPQ });
 
-    await transaction.commit();
+    // await transaction.commit();
     return successResponse(res, 200, { task }, "Task rejected successfully!");
   } catch (err) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong!", err);
   }
 };

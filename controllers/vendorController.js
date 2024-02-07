@@ -2,29 +2,30 @@ const { errorResponse, successResponse } = require("../utils/apiResponse");
 const { Vendor, sequelize } = require("../models");
 // Create a new vendor
 exports.createVendor = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const { vendor_name } = req.body;
     const vendor = await Vendor.create(
       {
         vendor_name,
         created_by: req.user.id,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
 
     return successResponse(res, 201, { vendor }, "Vendor created successfully");
   } catch (err) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong", err);
   }
 };
 
 // Update a vendor
 exports.updateVendor = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
 
   try {
     const vendorId = req.params.id;
@@ -39,14 +40,14 @@ exports.updateVendor = async (req, res) => {
     // Update vendor fields
     vendor.vendor_name = vendor_name;
     vendor.updated_by = req.user.id;
-    await vendor.save({ transaction });
+    await vendor.save();
 
-    await transaction.commit();
+    // await transaction.commit();
 
     return successResponse(res, 200, { vendor }, "Vendor updated successfully");
   } catch (err) {
     console.error(err);
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 500, "Something went wrong", err);
   }
 };
@@ -60,9 +61,9 @@ exports.getAllVendors = async (req, res) => {
     let whereClause = {};
 
     if (vendorName) {
-      whereClause = { vendor_name: vendorName , deletedAt : null};
-    }else{
-      whereClause = {deletedAt : null}
+      whereClause = { vendor_name: vendorName, deletedAt: null };
+    } else {
+      whereClause = { deletedAt: null };
     }
 
     const totalCount = await Vendor.count({ where: whereClause });
@@ -85,7 +86,7 @@ exports.getAllVendors = async (req, res) => {
         created_by: vendor.created_by,
         updated_by: vendor.updated_by,
         deleted_by: vendor.deleted_by,
-        deletedAt : vendor.deletedAt
+        deletedAt: vendor.deletedAt,
       };
     });
 

@@ -20,7 +20,7 @@ module.exports = {
         "Edit Profile",
         "View profile",
         "Self-assign a task",
-        "View tasks",
+        "View task",
         "View jobs",
       ];
 

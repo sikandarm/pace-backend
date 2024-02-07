@@ -14,7 +14,7 @@ const parseDate = require("../utils/parseDate");
 const sendPushNotification = require("../utils/sendPushNotification");
 
 exports.createCAReort = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     let {
       originatorName,
@@ -71,11 +71,12 @@ exports.createCAReort = async (req, res) => {
         approvalName,
         approvalDate,
         userId,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
     if (caReport) {
       const targetRoles = ["Quality Manager"];
 
@@ -135,13 +136,13 @@ exports.createCAReort = async (req, res) => {
     );
   } catch (err) {
     console.log(err);
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 500, "Something went wrong!", err);
   }
 };
 
 exports.updateCAReport = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
 
   const caReportId = req.params.id;
 
@@ -195,11 +196,12 @@ exports.updateCAReport = async (req, res) => {
         approvalName,
         approvalDate: parseDate(approvalDate),
         userId,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
     return successResponse(
       res,
       200,
@@ -208,7 +210,7 @@ exports.updateCAReport = async (req, res) => {
     );
   } catch (err) {
     console.log(err);
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 500, "Something went wrong!", err);
   }
 };
@@ -277,7 +279,7 @@ exports.deleteCAReport = async (req, res) => {
 };
 
 exports.createSharedReport = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   const { userId, reportId } = req.body;
 
   try {
@@ -303,11 +305,12 @@ exports.createSharedReport = async (req, res) => {
       reportId,
     }));
 
-    const createdSharedReports = await SharedReport.bulkCreate(sharedReports, {
-      transaction,
-    });
+    const createdSharedReports = await SharedReport.bulkCreate(sharedReports);
+    //    {
+    //   transaction,
+    // }
 
-    await transaction.commit();
+    // await transaction.commit();
     if (createdSharedReports) {
       for (const sharedReport of createdSharedReports) {
         const userTokens = await DeviceToken.findAll({
@@ -346,7 +349,7 @@ exports.createSharedReport = async (req, res) => {
       "Reports shared successfully!"
     );
   } catch (err) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 500, "Something went wrong!", err);
   }
 };
@@ -391,7 +394,7 @@ exports.getSharedReportsByUserId = async (req, res) => {
 };
 
 exports.updateReportStatus = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   const { reportId } = req.params;
   const { status } = req.body;
   try {
@@ -403,11 +406,12 @@ exports.updateReportStatus = async (req, res) => {
     await caReport.update(
       {
         status,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
     return successResponse(
       res,
       200,
@@ -416,7 +420,7 @@ exports.updateReportStatus = async (req, res) => {
     );
   } catch (err) {
     console.log(err);
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 500, "Something went wrong!", err);
   }
 };

@@ -253,7 +253,7 @@ const getBill = async (req, res) => {
 };
 
 const deleteBill = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const { billTitle } = req.params;
 
@@ -280,20 +280,20 @@ const deleteBill = async (req, res) => {
         const deletedByUserId = req.user.id;
         bill.deletedBy = deletedByUserId;
         bill.deletedAt = new Date();
-        await bill.save({ transaction });
+        await bill.save();
 
         // Soft delete associated bill_of_lading_items
         await Promise.all(
           bill.bill_of_landing_items.map(async (item) => {
             item.deletedBy = deletedByUserId;
             item.deletedAt = new Date();
-            await item.save({ transaction });
+            await item.save();
           })
         );
       })
     );
 
-    await transaction.commit();
+    // await transaction.commit();
 
     return successResponse(
       res,
@@ -302,13 +302,13 @@ const deleteBill = async (req, res) => {
       `Bills with title "${title}" deleted successfully`
     );
   } catch (err) {
-    await transaction.rollback(); // Rollback the transaction in case of error
+    // await transaction.rollback(); // Rollback the transaction in case of error
     return errorResponse(res, 500, "Error while Deleting Bills", err);
   }
 };
 
 const createBill = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const {
       billTitle,

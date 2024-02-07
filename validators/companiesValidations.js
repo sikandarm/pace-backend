@@ -4,7 +4,7 @@ const companyValidationRules = [
   body("name").notEmpty().withMessage("is required"),
   body("address").notEmpty().withMessage("is required"),
   body("phone").notEmpty().withMessage("is required"),
-  // body("fax").notEmpty().withMessage("is required"),
+
   body("email")
     .notEmpty()
     .withMessage("is required")

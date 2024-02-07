@@ -1,7 +1,7 @@
 const { body, param } = require("express-validator");
 
 const purchaseOrderValidationRules = [
-  body("fax").notEmpty().withMessage("is required"),
+  // body("fax").notEmpty().withMessage("is required"),
   body("term").notEmpty().withMessage("is required"),
   body("email").notEmpty().withMessage("is required"),
   body("ship_to").notEmpty().withMessage("is required"),

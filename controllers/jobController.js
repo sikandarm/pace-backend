@@ -19,7 +19,7 @@ const sendPushNotification = require("../utils/sendPushNotification");
 const pushNotificationQueue = require("../services/pushNotificationService");
 
 exports.createJob = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     let { name, description, startDate, endDate, status } = req.body;
 
@@ -33,21 +33,22 @@ exports.createJob = async (req, res) => {
         startDate,
         endDate,
         status,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
 
     return successResponse(res, 201, { job }, "Job created successfully!");
   } catch (err) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong!", err);
   }
 };
 
 exports.updateJob = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const jobId = req.params.id;
     const { name, description, startDate, endDate, status } = req.body;
@@ -68,11 +69,12 @@ exports.updateJob = async (req, res) => {
         startDate: parseDate(startDate),
         endDate: parseDate(endDate),
         status,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
 
     if (status !== previousStatus) {
       const targetRolesFilePath = path.join(
@@ -138,12 +140,12 @@ exports.updateJob = async (req, res) => {
 
     return successResponse(res, 200, { job }, "Job updated successfully!");
   } catch (err) {
-    if (transaction.finished === "commit") {
-      console.log(err);
-      return errorResponse(res, 400, "Something went wrong", err);
-    }
-    console.log(err);
-    await transaction.rollback();
+    // if (transaction.finished === "commit") {
+    //   console.log(err);
+    //   return errorResponse(res, 400, "Something went wrong", err);
+    // }
+    // console.log(err);
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong!", err);
   }
 };
@@ -176,6 +178,7 @@ exports.getAlljob = async (req, res) => {
         endDate: job.endDate,
         totalTasks, // only include totalTasks and completedTasks properties
         completedTasks,
+        createdAt: job.createdAt,
         po_id: job.po_id,
       };
     });
@@ -204,7 +207,7 @@ exports.getJob = async (req, res) => {
 };
 
 exports.deleteJob = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   const jobId = req.params.id;
   try {
     const job = await Job.findByPk(jobId);
@@ -213,18 +216,18 @@ exports.deleteJob = async (req, res) => {
       return successResponse(res, 200, { job: {} }, "No job found");
     }
 
-    const deletedJob = await job.destroy({ transaction });
+    const deletedJob = await job.destroy();
 
     if (deletedJob) {
-      await transaction.commit(); // Commit the transaction
+      // await transaction.commit(); // Commit the transaction
 
       return successResponse(res, 200, null, "Job deleted successfully");
     }
 
-    await transaction.rollback(); // Rollback the transaction
+    // await transaction.rollback(); // Rollback the transaction
     return errorResponse(res, 400, "Failed to delete!");
   } catch (err) {
-    await transaction.rollback(); // Rollback the transaction
+    // await transaction.rollback(); // Rollback the transaction
     return errorResponse(res, 500, "Error while deleting job", err);
   }
 };

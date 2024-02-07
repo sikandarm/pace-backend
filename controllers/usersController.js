@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 const filterSortPaginate = require("../utils/queryUtil");
 
 exports.createUser = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const {
       firstName,
@@ -45,25 +45,26 @@ exports.createUser = async (req, res) => {
         zip,
         isActive,
         ratePerHour,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
     if (roleId) {
-      await user.addRole(roleId, { transaction });
+      await user.addRole(roleId);
     }
 
-    await transaction.commit();
+    // await transaction.commit();
 
     return successResponse(res, 201, { user }, "User created successfully!");
   } catch (err) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong!", err);
   }
 };
 
 exports.updateUser = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const id = req.params.id;
 
@@ -99,15 +100,16 @@ exports.updateUser = async (req, res) => {
         zip,
         isActive,
         ratePerHour,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
     if (updatedUser) {
       if (roleId) {
-        await user.setRoles(roleId, { transaction });
+        await user.setRoles(roleId);
       }
-      await transaction.commit();
+      // await transaction.commit();
       return successResponse(
         res,
         201,
@@ -116,10 +118,10 @@ exports.updateUser = async (req, res) => {
       );
     }
 
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Update Failed!");
   } catch (err) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong!", err);
   }
 };
@@ -230,7 +232,7 @@ exports.deleteUser = async (req, res) => {
 };
 
 exports.userSignup = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const { firstName, lastName, email, password, phone, ratePerHour, roleId } =
       req.body;
@@ -255,19 +257,20 @@ exports.userSignup = async (req, res) => {
         phone,
         isActive: false,
         ratePerHour,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
     if (roleId) {
-      await user.addRole(roleId, { transaction });
+      await user.addRole(roleId);
     }
 
-    await transaction.commit();
+    // await transaction.commit();
 
     return successResponse(res, 201, { user }, "Signup successful!");
   } catch (err) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong!", err);
   }
 };

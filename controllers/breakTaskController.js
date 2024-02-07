@@ -11,9 +11,9 @@ const {
 const sendPushNotification = require("../utils/sendPushNotification");
 const { formatTime } = require("../utils/timeConverter");
 const setbreaktask = async (req, res) => {
-  const transaction = await sequelize.transaction();
   try {
     const { break_start, break_end, comment, taskid } = req.body;
+    console.log(")_)_)_)", break_start, break_end, comment, taskid);
     if (break_start) {
       const checkstartbreak = await breaktasks.findAll({
         where: {
@@ -28,18 +28,15 @@ const setbreaktask = async (req, res) => {
 
       const task = await Task.findByPk(taskid);
 
-      const setstartdate = await breaktasks.create(
-        {
-          task_id: taskid,
-          break_start: break_start,
-          break_end: null,
-          comment: comment,
-          task_status: task.status,
-          createdBy: req.user.id,
-        },
-        { transaction }
-      );
-      await transaction.commit();
+      const setstartdate = await breaktasks.create({
+        task_id: taskid,
+        break_start: break_start,
+        break_end: null,
+        comment: comment,
+        task_status: task.status,
+        createdBy: req.user.id,
+      });
+
       const modifiedres = {
         id: setstartdate.id,
         task_id: setstartdate.task_id,

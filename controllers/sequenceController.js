@@ -36,7 +36,7 @@ const getsequence = async (req, res) => {
 };
 
 const createsequencete = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const { sequence_name, job_id } = req.body;
     if (job_id == null) {
@@ -63,9 +63,9 @@ const createsequencete = async (req, res) => {
         job_id: job_id,
         createdBy: req.user.id,
       },
-      { transaction, include: Job }
+      { include: Job }
     );
-    await transaction.commit();
+    // await transaction.commit();
     if (createsequences) {
       const response = await sequence.findByPk(createsequences.id, {
         include: {
@@ -88,7 +88,7 @@ const createsequencete = async (req, res) => {
       return errorResponse(res, 200, "Sequence not created");
     }
   } catch (error) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong!", error);
   }
 };
@@ -155,7 +155,7 @@ const getallSequences = async (req, res) => {
 };
 
 const updatesequencete = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
     const { sequence_name, job_id } = req.body;
@@ -185,9 +185,9 @@ const updatesequencete = async (req, res) => {
         job_id: job_id,
         updatedBy: req.user.id,
       },
-      { transaction, include: Job }
+      { include: Job }
     );
-    await transaction.commit();
+    // await transaction.commit();
     if (updatessequences) {
       const response = await sequence.findByPk(updatessequences.id, {
         include: {
@@ -210,7 +210,7 @@ const updatesequencete = async (req, res) => {
       return errorResponse(res, 200, "Sequence not Update");
     }
   } catch (error) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong!", error);
   }
 };

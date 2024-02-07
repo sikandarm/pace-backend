@@ -71,7 +71,7 @@ const getsequencetask = async (req, res) => {
 };
 
 const updatesequencetask = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  // const transaction = await sequelize.transaction();
   try {
     const { sequence_id, task_id } = req.body;
     const whereCluse = {
@@ -90,7 +90,7 @@ const updatesequencetask = async (req, res) => {
     });
 
     if (existingSequence) {
-      await existingSequence.update({ deletedAt: new Date() }, { transaction });
+      await existingSequence.update({ deletedAt: new Date() });
     }
 
     const createsequencetask = await sequence_task.create(
@@ -98,11 +98,12 @@ const updatesequencetask = async (req, res) => {
         sequence_id: sequence_id,
         task_id: task_id,
         createdBy: req.user.id,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
 
     if (createsequencetask) {
       return successResponse(
@@ -115,7 +116,7 @@ const updatesequencetask = async (req, res) => {
       return errorResponse(res, 200, "SequenceTask not created");
     }
   } catch (error) {
-    await transaction.rollback();
+    // await transaction.rollback();
     return errorResponse(res, 400, "Something went wrong!", error);
   }
 };

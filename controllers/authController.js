@@ -18,6 +18,36 @@ exports.login = async (req, res) => {
       return errorResponse(res, 400, "All fields are required");
     }
 
+    // Assuming you have Sequelize models defined, replace 'DeviceToken' with your actual Sequelize model name
+
+    // Check if fcm_token exists
+    if (fcm_token) {
+      try {
+        // Find a record in the DeviceToken table with the given fcm_token
+        const tokenCheck = await DeviceToken.findOne({
+          where: {
+            token: fcm_token,
+          },
+        });
+
+        // Check if a record was found and it has a valid id
+        if (tokenCheck && tokenCheck.id) {
+          // Remove the record from the DeviceToken table based on the id
+          await DeviceToken.destroy({
+            where: {
+              id: tokenCheck.id,
+            },
+          });
+
+          console.log("DeviceToken record removed successfully.");
+        } else {
+          console.log("No matching DeviceToken record found.");
+        }
+      } catch (error) {
+        console.error("Error while removing DeviceToken record:", error);
+      }
+    }
+
     const user = await User.findOne({
       where: { email },
       include: [
@@ -28,7 +58,10 @@ exports.login = async (req, res) => {
         },
       ],
     });
-    const comparePwd = await bcrypt.compare(password, user.password);
+    let comparePwd;
+    if (user) {
+      comparePwd = await bcrypt.compare(password, user.password);
+    }
     if (!comparePwd) {
       return errorResponse(res, 401, "Invalid credentials");
     }
@@ -83,7 +116,7 @@ exports.login = async (req, res) => {
 
     return successResponse(res, 200, { token }, "Login successful!");
   } catch (err) {
-    return errorResponse(res, 400, "Something went wrong", err);
+    return errorResponse(res, 400, "Something went wrongs", err);
   }
 };
 
@@ -100,13 +133,40 @@ exports.logout = async (req, res) => {
 };
 
 exports.socialLogin = async (req, res) => {
-  const transaction = await sequelize.transaction();
-
   try {
     const { email, Uid, name, roleId, phone, fcm_token } = req.body;
 
     if (!email || !Uid) {
       return errorResponse(res, 400, "All fields are required");
+    }
+    // Assuming you have Sequelize models defined, replace 'DeviceToken' with your actual Sequelize model name
+
+    // Check if fcm_token exists
+    if (fcm_token) {
+      try {
+        // Find a record in the DeviceToken table with the given fcm_token
+        const tokenCheck = await DeviceToken.findOne({
+          where: {
+            token: fcm_token,
+          },
+        });
+
+        // Check if a record was found and it has a valid id
+        if (tokenCheck && tokenCheck.id) {
+          // Remove the record from the DeviceToken table based on the id
+          await DeviceToken.destroy({
+            where: {
+              id: tokenCheck.id,
+            },
+          });
+
+          console.log("DeviceToken record removed successfully.");
+        } else {
+          console.log("No matching DeviceToken record found.");
+        }
+      } catch (error) {
+        console.error("Error while removing DeviceToken record:", error);
+      }
     }
 
     const users = await User.findOne({
@@ -121,22 +181,18 @@ exports.socialLogin = async (req, res) => {
     });
 
     if (users === null) {
-      const usercreate = await User.create(
-        {
-          firstName: name,
-          lastName: name,
-          email: email,
-          phone: phone,
-          Uid: Uid,
-          password: Uid,
-        },
-        { transaction }
-      );
+      const usercreate = await User.create({
+        firstName: name,
+        lastName: name,
+        email: email,
+        phone: phone,
+        Uid: Uid,
+        password: Uid,
+      });
 
       if (roleId) {
-        await usercreate.addRole(roleId, { transaction });
+        await usercreate.addRole(roleId);
       }
-      await transaction.commit();
     }
 
     const user = await User.findOne({

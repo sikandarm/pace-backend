@@ -19,7 +19,7 @@ module.exports = {
         "View inventory",
         "Export Inventory",
         "View jobs",
-        "View tasks",
+        "View task",
         "Edit Sequence",
         "View Sequence",
         "Delete Sequence",
