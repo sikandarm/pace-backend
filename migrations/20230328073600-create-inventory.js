@@ -1,104 +1,119 @@
-'use strict';
+"use strict";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('inventories', {
+    await queryInterface.createTable("inventories", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       ediStdNomenclature: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        unique: true
+        unique: true,
       },
       aiscManualLabel: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        unique: true
+        unique: true,
       },
       shape: {
-        type: Sequelize.ENUM("2L","C", "HP", "HSS", "L", "M", "MC", "MT", "PIPE", "S", "ST", "W", "WT"), allowNull: false
+        type: Sequelize.ENUM(
+          "2L",
+          "C",
+          "HP",
+          "HSS",
+          "L",
+          "M",
+          "MC",
+          "MT",
+          "PIPE",
+          "S",
+          "ST",
+          "W",
+          "WT"
+        ),
+        allowNull: false,
       },
-      weight : {
+      weight: {
         type: Sequelize.DECIMAL(10, 2),
-        allowNull: false
+        allowNull: false,
       },
-      depth : {
+      depth: {
         type: Sequelize.DECIMAL(10, 2),
-        allowNull: false
+        allowNull: false,
       },
       grade: {
-        type: Sequelize.STRING(10),
+        type: Sequelize.STRING,
         allowNull: false,
       },
       poNumber: {
-        type: Sequelize.STRING(10),
-        allowNull: false
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       heatNumber: {
-        type: Sequelize.STRING(10),
-        allowNull: false
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       orderArrivedInFull: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: true
+        defaultValue: true,
       },
       orderArrivedCMTR: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: true
+        defaultValue: true,
       },
       itemType: {
-        type: Sequelize.ENUM("stock","job"),
-        allowNull: false
+        type: Sequelize.ENUM("stock", "job"),
+        allowNull: false,
       },
       lengthReceivedFoot: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
       },
       lengthReceivedInch: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
       },
       quantity: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
       },
       poPulledFromNumber: {
-        type: Sequelize.STRING(10),
-        allowNull: false
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       lengthUsedFoot: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
       },
       lengthUsedInch: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
       },
       lengthRemainingFoot: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
       },
       lengthRemainingInch: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('inventories');
-  }
+    await queryInterface.dropTable("inventories");
+  },
 };

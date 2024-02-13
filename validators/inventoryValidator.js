@@ -37,22 +37,20 @@ const inventoryValidationRules = [
     .notEmpty()
     .withMessage("is required.")
     .isString()
-    .isLength({ min: 5, max: 10 })
-    .withMessage("must be a string with a length between 5 and 10 characters."),
+    // .isLength({ min: 5, max: 10 })
+    .withMessage("must be a string"),
   body("poNumber")
     .notEmpty()
     .withMessage("is required.")
-    .isString()
-    .isLength({ min: 5, max: 10 })
-    .withMessage(
-      "PO Number must be a string with a length between 5 and 10 characters."
-    ),
+    // .isString()
+    // .isLength({ min: 5, max: 10 })
+    .withMessage("PO Number must be a Number"),
   body("heatNumber")
     .notEmpty()
     .withMessage("is required.")
-    .isString()
-    .isLength({ min: 5, max: 10 })
-    .withMessage("must be a string with a length between 5 and 10 characters."),
+    // .isString()
+    // .isLength({ min: 5, max: 10 })
+    .withMessage("must be a Number"),
   body("orderArrivedInFull")
     .notEmpty()
     .withMessage("is required.")
@@ -71,44 +69,44 @@ const inventoryValidationRules = [
   body("lengthReceivedFoot")
     .notEmpty()
     .withMessage("is required.")
-    .isInt({ min: 0, max: 99 })
-    .withMessage("must be an integer between 0 and 99."),
+    // .isInt({ min: 0, max: 99 })
+    .withMessage("must be an integer"),
   body("lengthReceivedInch")
     .notEmpty()
     .withMessage("is required.")
-    .isInt({ min: 0, max: 99 })
-    .withMessage("must be an integer between 0 and 99."),
+    // .isInt({ min: 0, max: 99 })
+    .withMessage("must be an integer"),
   body("quantity")
     .notEmpty()
     .withMessage("is required.")
-    .isInt({ min: 0, max: 100 })
-    .withMessage("must be an integer between 0 and 100."),
+    // .isInt({ min: 0, max: 100 })
+    .withMessage("must be an integer"),
   body("poPulledFromNumber")
     .notEmpty()
     .withMessage("is required.")
-    .isString()
-    .isLength({ min: 5, max: 10 })
-    .withMessage("must be a string with a length between 5 and 10 characters."),
+    // .isString()
+    // .isLength({ min: 5, max: 10 })
+    .withMessage("must be a Number"),
   body("lengthUsedFoot")
     .notEmpty()
     .withMessage("is required.")
-    .isInt({ min: 0, max: 99 })
-    .withMessage("must be an integer between 0 and 99."),
+    // .isInt({ min: 0, max: 99 })
+    .withMessage("must be an integer"),
   body("lengthUsedInch")
     .notEmpty()
     .withMessage("is required.")
-    .isInt({ min: 0, max: 99 })
-    .withMessage("must be an integer between 0 and 99."),
+    // .isInt({ min: 0, max: 99 })
+    .withMessage("must be an integer"),
   body("lengthRemainingFoot")
     .notEmpty()
     .withMessage("is required.")
-    .isInt({ min: 0, max: 99 })
-    .withMessage("must be an integer between 0 and 99."),
+    // .isInt({ min: 0, max: 99 })
+    .withMessage("must be an integer"),
   body("lengthRemainingInch")
     .notEmpty()
     .withMessage("is required.")
-    .isInt({ min: 0, max: 99 })
-    .withMessage("must be an integer between 0 and 99."),
+    // .isInt({ min: 0, max: 99 })
+    .withMessage("must be an integer"),
 ];
 
 const paramValidationRules = [

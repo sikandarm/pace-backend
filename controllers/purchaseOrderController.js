@@ -22,10 +22,10 @@ const createPurchaseOrder = async (req, res) => {
   // const transaction = await sequelize.transaction();
   try {
     const {
-      company_id,
+      company_name,
       delivery_date,
       confirm_with,
-      vendor_id,
+      vendor_name,
       userId,
       order_date,
       placed_via,
@@ -51,10 +51,10 @@ const createPurchaseOrder = async (req, res) => {
 
     const purchaseOrder = await PurchaseOrder.create(
       {
-        company_name: company_id,
+        company_name: company_name,
         delivery_date,
         confirm_with,
-        vendor_name: vendor_id,
+        vendor_name: vendor_name,
         userId: userId || null,
         order_date,
         placed_via,
@@ -156,10 +156,10 @@ const updatePurchaseOrder = async (req, res) => {
   try {
     const purchaseOrderId = req.params.id;
     const {
-      company_id,
+      company_name,
       delivery_date,
       confirm_with,
-      vendor_id,
+      vendor_name,
       order_date,
       placed_via,
       po_number,
@@ -181,10 +181,10 @@ const updatePurchaseOrder = async (req, res) => {
       return errorResponse(res, 404, "PurchaseOrder not found");
     }
 
-    purchaseOrder.company_name = company_id;
+    purchaseOrder.company_name = company_name;
     purchaseOrder.delivery_date = delivery_date;
     purchaseOrder.confirm_with = confirm_with;
-    purchaseOrder.vendor_name = vendor_id;
+    purchaseOrder.vendor_name = vendor_name;
     purchaseOrder.order_date = order_date;
     purchaseOrder.placed_via = placed_via;
     purchaseOrder.po_number = po_number;

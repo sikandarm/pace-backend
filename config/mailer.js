@@ -19,17 +19,22 @@ exports.sendEmail = async (pdfBuffer) => {
       return "No contacts found";
     }
     const date = new Date(); // Replace this with your actual date
-
     const options = { year: "numeric", month: "short", day: "2-digit" };
-    const formattedDate = new Intl.DateTimeFormat("en-US", options).format(
-      date
-    );
+
+    const formatDayWithoutComma = (date) => {
+      const formattedDate = new Intl.DateTimeFormat("en-US", options).format(
+        date
+      );
+      return formattedDate.replace(",", "");
+    };
+
+    const formattedDate = formatDayWithoutComma(date);
 
     for (const contact of contacts) {
       const mailOptions = {
         from: "pacep8633@gmail.com",
         to: contact.email,
-        subject: "RIF",
+        subject: "RFI",
         text: `Request For Information`,
         attachments: [
           {

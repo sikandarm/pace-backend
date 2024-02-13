@@ -71,19 +71,19 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       grade: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: false,
-        validate: { len: [5, 10] },
+        // validate: { len: [5, 10] },
       },
       poNumber: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: false,
-        validate: { len: [5, 10] },
+        // validate: { len: [5, 10] },
       },
       heatNumber: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: false,
-        validate: { len: [5, 10] },
+        // validate: { len: [5, 10] },
       },
       orderArrivedInFull: {
         type: DataTypes.BOOLEAN,
@@ -103,42 +103,42 @@ module.exports = (sequelize, DataTypes) => {
       lengthReceivedFoot: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        validate: { min: 0, max: 99 },
+        // validate: { min: 0, max: 99 },
       },
       lengthReceivedInch: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        validate: { min: 0, max: 99 },
+        // validate: { min: 0, max: 99 },
       },
       quantity: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        validate: { min: 0, max: 100 },
+        // validate: { min: 0, max: 100 },
       },
       poPulledFromNumber: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: false,
-        validate: { len: [5, 10] },
+        // validate: { len: [5, 10] },
       },
       lengthUsedFoot: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        validate: { min: 0, max: 99 },
+        // validate: { min: 0, max: 99 },
       },
       lengthUsedInch: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        validate: { min: 0, max: 99 },
+        // validate: { min: 0, max: 99 },
       },
       lengthRemainingFoot: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        validate: { min: 0, max: 99 },
+        // validate: { min: 0, max: 99 },
       },
       lengthRemainingInch: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        validate: { min: 0, max: 99 },
+        // validate: { min: 0, max: 99 },
       },
     },
     {
